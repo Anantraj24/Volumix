@@ -127,7 +127,13 @@ class FakePreferencesService extends Fake implements PreferencesService {
   bool get isPersistentNotificationEnabled => true;
 
   @override
+  Future<void> setPersistentNotificationEnabled(bool value) async {}
+
+  @override
   bool get isFirstRunCompleted => true;
+
+  @override
+  Future<void> setFirstRunCompleted(bool value) async {}
 
   @override
   NotificationSettings getNotificationSettings() => const NotificationSettings();

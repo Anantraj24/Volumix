@@ -25,6 +25,7 @@ class SettingsController extends ChangeNotifier {
 
   Future<void> init() async {
     final amoled = _repository.isAmoledMode();
+    final persistentNotif = _repository.isPersistentNotificationEnabled();
     final firstRun = _repository.isFirstRunCompleted();
     final notifSettings = _repository.getNotificationSettings();
     final notifPerm = await _repository.checkNotificationPermission();
@@ -35,11 +36,17 @@ class SettingsController extends ChangeNotifier {
 
     _settings = AppSettings(
       isAmoledMode: amoled,
-      isPersistentNotificationEnabled: true,
+      isPersistentNotificationEnabled: persistentNotif,
       isFirstRunCompleted: firstRun,
       hasDndAccess: dndAccess,
       notificationSettings: notifSettings,
     );
+
+    // If persistent notification is enabled in preferences, ensure native service is running
+    if (persistentNotif) {
+      await _repository.setPersistentNotificationEnabled(true);
+    }
+
     notifyListeners();
   }
 

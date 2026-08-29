@@ -108,6 +108,9 @@ class VolumeRepository {
   Future<void> setAmoledMode(bool value) =>
       _preferencesService.setAmoledMode(value);
 
+  bool isPersistentNotificationEnabled() =>
+      _preferencesService.isPersistentNotificationEnabled;
+
   bool isFirstRunCompleted() => _preferencesService.isFirstRunCompleted;
   Future<void> setFirstRunCompleted(bool value) =>
       _preferencesService.setFirstRunCompleted(value);

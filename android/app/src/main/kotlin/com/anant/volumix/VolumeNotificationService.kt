@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ServiceInfo
 import android.media.AudioManager
 import android.os.Build
 import android.os.IBinder
@@ -29,14 +30,23 @@ class VolumeNotificationService : Service() {
             return START_NOT_STICKY
         }
 
-        val notification = buildNotification(this)
-        startForeground(NOTIFICATION_ID, notification)
+        try {
+            val notification = buildNotification(this)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+            android.util.Log.i("VolumeNotifService", "Foreground service started successfully")
+        } catch (e: Exception) {
+            android.util.Log.e("VolumeNotifService", "Error starting foreground service", e)
+        }
         return START_STICKY
     }
 
     companion object {
         const val NOTIFICATION_ID = 1001
-        const val CHANNEL_ID = "volumix_persistent_control"
+        const val CHANNEL_ID = "volumix_persistent_control_v2"
 
         const val ACTION_DECREASE_MASTER = "com.anant.volumix.ACTION_DECREASE_MASTER"
         const val ACTION_INCREASE_MASTER = "com.anant.volumix.ACTION_INCREASE_MASTER"
@@ -70,9 +80,13 @@ class VolumeNotificationService : Service() {
             val isEnabled = prefs.getBoolean(VolumeManager.PREF_PERSISTENT_NOTIF, true)
             if (!isEnabled) return
 
-            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val notification = buildNotification(context)
-            nm.notify(NOTIFICATION_ID, notification)
+            try {
+                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notification = buildNotification(context)
+                nm.notify(NOTIFICATION_ID, notification)
+            } catch (e: Exception) {
+                android.util.Log.e("VolumeNotifService", "Error updating notification", e)
+            }
         }
 
         private fun createNotificationChannel(context: Context) {
@@ -80,7 +94,7 @@ class VolumeNotificationService : Service() {
                 val channel = NotificationChannel(
                     CHANNEL_ID,
                     context.getString(R.string.notification_channel_name),
-                    NotificationManager.IMPORTANCE_LOW
+                    NotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
                     description = context.getString(R.string.notification_channel_desc)
                     setShowBadge(false)
@@ -211,7 +225,7 @@ class VolumeNotificationService : Service() {
                 .setContentIntent(appPendingIntent)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
         }
