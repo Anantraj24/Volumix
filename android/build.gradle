@@ -6,9 +6,7 @@ allprojects {
 }
 
 subprojects {
-    if (project.path != ":app") {
-        project.evaluationDependsOn(":app")
-    }
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {
