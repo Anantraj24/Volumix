@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Volumix</string>
+    <string name="notification_channel_name">Volumix Volume Controller</string>
+    <string name="notification_channel_desc">Persistent volume controls for quick access from the notification shade</string>
+    <string name="action_decrease">Decrease Volume</string>
+    <string name="action_increase">Increase Volume</string>
+    <string name="action_mute">Mute / Unmute</string>
+</resources>

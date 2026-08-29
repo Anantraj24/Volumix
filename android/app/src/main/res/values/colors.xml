@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="volumix_black">#000000</color>
+    <color name="volumix_surface">#121212</color>
+    <color name="volumix_surface_high">#1F1F1F</color>
+    <color name="volumix_surface_highest">#2A2A2A</color>
+    <color name="volumix_cyan">#00E5FF</color>
+    <color name="volumix_cyan_dark">#00626E</color>
+    <color name="volumix_secondary">#ADC7FF</color>
+    <color name="volumix_text_primary">#E2E2E2</color>
+    <color name="volumix_text_secondary">#BAC9CC</color>
+    <color name="volumix_error">#FFB4AB</color>
+</resources>
