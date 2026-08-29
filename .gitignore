@@ -8,6 +8,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+*.log
 
 # Flutter/Dart files
 .dart_tool/
@@ -17,7 +18,9 @@ local.properties
 *.apk
 *.aab
 
-# Kotlin files
+# Kotlin & Android files
 .kotlin/
 android/.kotlin/
-
+android/.gradle/
+android/app/build/
+android/build/

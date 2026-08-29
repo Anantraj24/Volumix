@@ -2,7 +2,11 @@
 
 **Volumix** is a modern, high-performance, and completely offline Android system-volume controller engineered with **Flutter**, **Material 3**, and native **Kotlin Android APIs** (`AudioManager`, `ContentObserver`, and `RemoteViews` persistent foreground notifications).
 
-Designed based on the Stitch AMOLED dark visual system (Design ID: `13554949887483774509`).
+- **App Name**: Volumix
+- **Package Name**: `com.anant.volumix`
+- **Framework**: Flutter (Dart 3.x)
+- **Native Platform**: Android (Kotlin 2.1.0, Android SDK API 24–36, Gradle 8.14.5)
+- **Repository**: [https://github.com/Anantraj24/volumix.git](https://github.com/Anantraj24/volumix.git)
 
 ---
 
@@ -22,16 +26,6 @@ Designed based on the Stitch AMOLED dark visual system (Design ID: `135549498874
 - **Customizable Notification Streams**: Settings to choose which streams and control toggles appear in the notification drawer.
 - **AMOLED Pure Black Mode**: True `#000000` dark theme engineered to maximize battery efficiency on OLED displays.
 - **100% Offline & Private**: Zero network dependencies, zero telemetry, zero analytics. All operations are performed locally on the device hardware.
-
----
-
-## Screenshots & Design System
-
-Volumix adheres strictly to the Stitch Design System:
-- **AMOLED Minimalism**: Pure black void (`#000000`) and subtle `#121212` tactile card containers with 1px `#1F1F1F` borders.
-- **Electric Cyan Accents**: Vibrant `#00E5FF` active states, cyan glow rings, and progress arcs.
-- **Dual Typography**: **Inter** for primary UI elements and neutral typography; **Geist** monospaced font styling for precise numerical percentages and badges.
-- **Ultra-Rounded Geometry**: Pill buttons (`rounded-full`), 16dp / 24dp / 28dp card radii, and 48dp+ accessibility-compliant touch targets.
 
 ---
 
@@ -61,143 +55,93 @@ Native Android Layer (Kotlin)
 Android Audio HAL & Audio System
 ```
 
-### Technology Matrix
-- **UI Framework**: Flutter (Dart 3.x)
-- **Native Platform**: Android (Kotlin, Android SDK API 24–34)
-- **Audio Interface**: `android.media.AudioManager`
-- **Inter-Process Communication**: Flutter Platform Channels (`MethodChannel` & `EventChannel`)
-- **Persistence**: `SharedPreferences` (local snapshot storage & user preferences)
+---
+
+## System Requirements
+
+- **Flutter SDK**: `>= 3.24.0` (Dart `>= 3.5.0`)
+- **JDK (Java Development Kit)**: **JDK 17** (or compatible JDK 17–21)
+- **Android SDK**: Android SDK API 24 (minSdk) to API 36 (compileSdk / targetSdk)
+- **Android Studio**: Android Studio Koala / Ladybug or newer with Flutter & Dart plugins installed
+- **Gradle**: 8.14.5 (configured via gradle-wrapper)
 
 ---
 
-## Project Structure
+## Android Studio Setup Guide
 
+1. **Open the Project**:
+   - Open **Android Studio**.
+   - Click **Open** (or `File` > `Open...`).
+   - Select the root folder `Volumix` (or the `android/` subfolder if opening as a pure Android project).
+
+2. **Configure JDK in Android Studio**:
+   - Go to **File** > **Settings** (or **Preferences** on macOS) > **Build, Execution, Deployment** > **Build Tools** > **Gradle**.
+   - Under **Gradle JVM**, ensure **JDK 17** is selected (e.g. Eclipse Adoptium 17, Oracle JDK 17, or Android Studio Embedded JDK 17).
+   - Gradle 8.14.5 is compatible with JDK 17–21.
+
+3. **Sync Project with Gradle Files**:
+   - Click the **Sync Project with Gradle Files** button (elephant icon with blue arrow) in the top toolbar.
+
+---
+
+## Flutter Development & Build Commands
+
+### 1. Fetch Dependencies
+```bash
+flutter pub get
 ```
-Volumix/
-├── android/
-│   ├── app/
-│   │   ├── src/main/
-│   │   │   ├── kotlin/com/anant/volumix/
-│   │   │   │   ├── MainActivity.kt               # FlutterActivity entry point
-│   │   │   │   ├── VolumeManager.kt              # Android AudioManager engine
-│   │   │   │   ├── VolumeObserver.kt             # Real-time hardware volume listener
-│   │   │   │   ├── VolumeNotificationService.kt  # Persistent Android notification
-│   │   │   │   ├── NotificationActionReceiver.kt # Background action receiver
-│   │   │   │   ├── BootReceiver.kt               # Boot completed receiver
-│   │   │   │   └── VolumePlatformChannel.kt      # Platform Channel glue code
-│   │   │   ├── res/
-│   │   │   │   ├── layout/                       # Collapsed & Expanded notification layouts
-│   │   │   │   ├── drawable/                     # Vector drawables & background shapes
-│   │   │   │   └── values/                       # Colors & Strings
-│   │   │   └── AndroidManifest.xml
-│   │   └── build.gradle.kts
-│   └── build.gradle.kts
-├── lib/
-│   ├── core/
-│   │   └── constants/
-│   │       ├── app_colors.dart                   # Stitch color tokens
-│   │       ├── app_typography.dart               # Typography tokens
-│   │       ├── app_spacing.dart                  # Spacing & corner radii
-│   │       └── audio_stream_types.dart           # Stream definitions & gradients
-│   ├── models/
-│   │   ├── volume_stream.dart                    # Stream model
-│   │   ├── notification_settings.dart            # Notification toggle model
-│   │   ├── app_settings.dart                     # Theme & feature settings
-│   │   └── volume_snapshot.dart                  # Snapshot data model
-│   ├── repositories/
-│   │   └── volume_repository.dart                # Repository coordination layer
-│   ├── services/
-│   │   ├── preferences_service.dart              # SharedPreferences client
-│   │   └── volume_platform_service.dart          # MethodChannel & EventChannel client
-│   ├── state/
-│   │   ├── volume_controller.dart                # Volume state & actions
-│   │   └── settings_controller.dart              # Settings & permissions state
-│   ├── theme/
-│   │   └── app_theme.dart                        # Dark & AMOLED ThemeData
-│   ├── widgets/
-│   │   ├── master_volume_dial.dart               # Circular master dial painter & gestures
-│   │   ├── tactile_stream_card.dart              # Granular stream card widget
-│   │   ├── tactile_slider.dart                   # Custom tactile gradient slider
-│   │   ├── quick_action_buttons.dart             # Mute All & Restore All pills
-│   │   ├── bottom_nav_bar.dart                   # Stitch bottom navigation bar
-│   │   ├── status_banner.dart                    # DND & External change indicators
-│   │   └── reset_confirm_dialog.dart             # Reset confirmation modal
-│   ├── screens/
-│   │   ├── main_navigation_scaffold.dart         # Main navigation host
-│   │   ├── home_screen.dart                      # Home dashboard
-│   │   ├── quick_controls_screen.dart            # Quick controls screen
-│   │   ├── settings_screen.dart                  # Settings screen
-│   │   ├── notification_controls_screen.dart     # Notification customization screen
-│   │   ├── permission_setup_screen.dart          # First-run onboarding screen
-│   │   └── about_screen.dart                     # About & Legal screen
-│   └── main.dart                                 # App bootstrap & theme injection
-├── test/
-│   ├── models_test.dart                          # Unit tests for models
-│   ├── volume_controller_test.dart               # State controller unit tests
-│   └── widget_test.dart                          # UI & Widget integration tests
-└── pubspec.yaml
+
+### 2. Run Code Analysis & Tests
+```bash
+flutter analyze
+flutter test
+```
+
+### 3. Run Locally (Emulator / USB Debugging)
+```bash
+flutter run
+```
+
+### 4. Build APK
+
+#### Build Release APK:
+```bash
+flutter build apk --release
+```
+**Output Location:**
+```
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+#### Build Debug APK:
+```bash
+flutter build apk --debug
+```
+**Output Location:**
+```
+build/app/outputs/flutter-apk/app-debug.apk
+```
+
+#### Build App Bundle (AAB for Google Play):
+```bash
+flutter build appbundle --release
+```
+**Output Location:**
+```
+build/app/outputs/bundle/release/app-release.aab
 ```
 
 ---
 
-## Android Permissions & Capabilities
+## Android Permissions
 
 | Permission | Purpose |
 |------------|---------|
 | `android.permission.POST_NOTIFICATIONS` | Required on Android 13+ (API 33+) to display the persistent volume notification. |
 | `android.permission.ACCESS_NOTIFICATION_POLICY` | Required to adjust ring or alarm volumes while Do Not Disturb is active. |
 | `android.permission.FOREGROUND_SERVICE` | Keeps the persistent control notification active and responsive in the background. |
+| `android.permission.FOREGROUND_SERVICE_SPECIAL_USE` | Declares the persistent audio volume control background service on Android 14+ (API 34+). |
 | `android.permission.RECEIVE_BOOT_COMPLETED` | Restores persistent notification controls after a device reboot (if enabled). |
-
----
-
-## Supported Android Versions & Limitations
-
-- **Minimum SDK**: Android 7.0 / API 24 (Nougat)
-- **Target SDK**: Android 14 / API 34 (Upside Down Cake)
-- **Known Android Limitations**:
-  - Certain device manufacturers (OEMs) couple the Ring and Notification volume streams together in software; adjusting one may automatically update the other depending on device firmware settings.
-  - Modifying the Ring stream during active Do Not Disturb (DND) mode requires granting Notification Policy Access via Android Settings. Volumix detects this state and displays a warning banner with direct navigation to the system settings page.
-  - `STREAM_VOICE_CALL` is restricted by Android when no cellular or VoIP call is in progress on select devices.
-
----
-
-## Build & Installation Instructions
-
-### Prerequisites
-- Flutter SDK (version 3.24.0 or higher)
-- Android SDK (API 24 to 34)
-- Java Development Kit (JDK 17)
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/Anantraj24/volumix.git
-cd volumix
-```
-
-### 2. Fetch dependencies
-```bash
-flutter pub get
-```
-
-### 3. Run analyzer & tests
-```bash
-flutter analyze
-flutter test
-```
-
-### 4. Run the app on a connected Android device or emulator
-```bash
-flutter run
-```
-
-### 5. Build Debug APK
-```bash
-flutter build apk --debug
-```
-
-The compiled APK will be located at:
-`build/app/outputs/flutter-apk/app-debug.apk`
 
 ---
 

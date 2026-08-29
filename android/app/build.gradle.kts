@@ -1,7 +1,11 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+flutter {
+    source = "../.."
 }
 
 android {
@@ -21,7 +25,7 @@ android {
     defaultConfig {
         applicationId = "com.anant.volumix"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -38,8 +42,4 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.annotation:annotation:1.7.1")
-}
-
-flutter {
-    source = "../.."
 }
