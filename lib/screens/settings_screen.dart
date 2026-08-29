@@ -63,7 +63,7 @@ class SettingsScreen extends StatelessWidget {
                       'Keep Volumix controls accessible in the status bar',
                       style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                     ),
-                    activeColor: AppColors.cyan,
+                    activeTrackColor: AppColors.cyan,
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   ),
@@ -127,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
                   'Maximize battery savings on OLED displays',
                   style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                 ),
-                activeColor: AppColors.cyan,
+                activeTrackColor: AppColors.cyan,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               ),

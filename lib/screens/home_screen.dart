@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_typography.dart';
-import '../models/volume_stream.dart';
 import '../state/settings_controller.dart';
 import '../state/volume_controller.dart';
 import '../widgets/master_volume_dial.dart';
