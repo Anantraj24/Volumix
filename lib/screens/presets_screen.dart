@@ -158,134 +158,142 @@ class PresetsScreen extends StatelessWidget {
               ),
             ),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Quick Presets Header
-                _buildSectionHeader('Quick Presets'),
-                const SizedBox(height: 8),
-
-                // Quick Presets Grid
-                GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2.2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: builtIns.map((preset) {
-                    return _buildQuickPresetCard(context, preset);
-                  }).toList(),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 580),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
                 ),
-
-                const SizedBox(height: 28),
-
-                // Custom Presets Header + Add Button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader('Custom Presets'),
-                    TextButton.icon(
-                      onPressed: () => _showCreatePresetSheet(context),
-                      icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.cyan),
-                      label: Text(
-                        'Create',
-                        style: AppTypography.labelLarge.copyWith(
-                          color: AppColors.cyan,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                    // Quick Presets Header
+                    _buildSectionHeader('Quick Presets'),
+                    const SizedBox(height: 8),
 
-                if (customs.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBackground,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.cardBorder),
+                    // Quick Presets Grid
+                    GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: builtIns.map((preset) {
+                        return _buildQuickPresetCard(context, preset);
+                      }).toList(),
                     ),
-                    child: Column(
+
+                    const SizedBox(height: 28),
+
+                    // Custom Presets Header + Add Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(
-                          Icons.bookmark_border_rounded,
-                          size: 40,
-                          color: AppColors.outline,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'No Custom Presets Yet',
-                          style: AppTypography.titleMedium.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Create custom volume profiles like Gaming, Night, or Study.',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        OutlinedButton.icon(
+                        _buildSectionHeader('Custom Presets'),
+                        TextButton.icon(
                           onPressed: () => _showCreatePresetSheet(context),
-                          icon: const Icon(Icons.add, size: 16, color: AppColors.cyan),
-                          label: const Text('Create Custom Preset',
-                              style: TextStyle(color: AppColors.cyan)),
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.cyan),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.cyan),
+                          label: Text(
+                            'Create',
+                            style: AppTypography.labelLarge.copyWith(
+                              color: AppColors.cyan,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ],
                     ),
-                  )
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: customs.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final preset = customs[index];
-                      return _buildCustomPresetCard(context, preset);
-                    },
-                  ),
+                    const SizedBox(height: 8),
 
-                if (customs.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _showCreatePresetSheet(context),
-                      icon: const Icon(Icons.add, size: 18, color: AppColors.cyan),
-                      label: const Text(
-                        '+ Create Custom Preset',
-                        style: TextStyle(color: AppColors.cyan, fontWeight: FontWeight.w700),
+                    if (customs.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.bookmark_border_rounded,
+                              size: 40,
+                              color: AppColors.outline,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No Custom Presets Yet',
+                              style: AppTypography.titleMedium.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Create custom volume profiles like Gaming, Night, or Study.',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.onSurfaceVariant,
+                                fontSize: 13,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              onPressed: () => _showCreatePresetSheet(context),
+                              icon: const Icon(Icons.add, size: 16, color: AppColors.cyan),
+                              label: const Text('Create Custom Preset',
+                                  style: TextStyle(color: AppColors.cyan)),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: AppColors.cyan),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: customs.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final preset = customs[index];
+                          return _buildCustomPresetCard(context, preset);
+                        },
                       ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.cyan, width: 1.2),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+
+                    if (customs.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showCreatePresetSheet(context),
+                          icon: const Icon(Icons.add, size: 18, color: AppColors.cyan),
+                          label: const Text(
+                            '+ Create Custom Preset',
+                            style: TextStyle(color: AppColors.cyan, fontWeight: FontWeight.w700),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppColors.cyan, width: 1.2),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ],
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
         );

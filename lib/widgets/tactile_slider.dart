@@ -59,7 +59,7 @@ class _TactileSliderState extends State<TactileSlider> {
 
         return RepaintBoundary(
           child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
+            behavior: HitTestBehavior.translucent,
             onHorizontalDragStart: (details) {
               if (!widget.isEnabled) return;
               setState(() {
@@ -93,7 +93,7 @@ class _TactileSliderState extends State<TactileSlider> {
               _handleUpdate(details.localPosition.dx, width, isDragging: false);
             },
             child: Container(
-              height: 40,
+              height: 38,
               color: Colors.transparent,
               alignment: Alignment.center,
               child: Stack(
@@ -102,32 +102,32 @@ class _TactileSliderState extends State<TactileSlider> {
                 children: [
                   // Inactive Background Track
                   Container(
-                    height: 8,
+                    height: 6,
                     width: width,
                     decoration: BoxDecoration(
                       color: AppColors.darkSurfaceContainer,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
 
                   // Active Filled Gradient Track
                   if (ratio > 0 && widget.isEnabled)
                     Container(
-                      height: 8,
+                      height: 6,
                       width: width * ratio,
                       decoration: BoxDecoration(
                         gradient: widget.gradient,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
 
                   // Thumb Knob
                   if (widget.isEnabled)
                     Positioned(
-                      left: (width * ratio - 10).clamp(0.0, width - 20),
+                      left: (width * ratio - 9).clamp(0.0, width - 18),
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: widget.gradient.colors.last,

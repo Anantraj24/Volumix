@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_typography.dart';
@@ -78,97 +79,116 @@ class QuickControlsScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Global Actions (Mute All / Restore All)
-                QuickActionButtons(
-                  isAllMuted: volumeController.isAllMuted,
-                  hasSavedSnapshot: volumeController.hasSavedSnapshot,
-                  onMuteAll: volumeController.muteAll,
-                  onRestoreAll: volumeController.restoreAll,
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 580),
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  scrollbars: false,
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.trackpad,
+                    PointerDeviceKind.stylus,
+                  },
                 ),
-
-                const SizedBox(height: 14),
-
-                // Quick Presets Row
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.cardBorder),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      for (final preset in builtIns)
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => _applyQuickPreset(context, preset),
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 7),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.darkSurfaceContainer,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppColors.cardBorder, width: 0.8),
+                      // Global Actions (Mute All / Restore All)
+                      QuickActionButtons(
+                        isAllMuted: volumeController.isAllMuted,
+                        hasSavedSnapshot: volumeController.hasSavedSnapshot,
+                        onMuteAll: volumeController.muteAll,
+                        onRestoreAll: volumeController.restoreAll,
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // Quick Presets Row
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.cardBorder),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        child: Row(
+                          children: [
+                            for (final preset in builtIns)
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () => _applyQuickPreset(context, preset),
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 7),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.darkSurfaceContainer,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: AppColors.cardBorder, width: 0.8),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          preset.name,
+                                          style: AppTypography.labelLarge.copyWith(
+                                            color: AppColors.cyan,
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    preset.name,
-                                    style: AppTypography.labelLarge.copyWith(
+                                ),
+                              ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 2),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: onOpenPresets,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.azureContainer.withValues(alpha: 0.25),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: AppColors.cyan.withValues(alpha: 0.3)),
+                                    ),
+                                    child: const Icon(
+                                      Icons.tune_rounded,
+                                      size: 15,
                                       color: AppColors.cyan,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 2),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: onOpenPresets,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: AppColors.azureContainer.withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.cyan.withValues(alpha: 0.3)),
-                              ),
-                              child: const Icon(
-                                Icons.tune_rounded,
-                                size: 15,
-                                color: AppColors.cyan,
-                              ),
-                            ),
-                          ),
+                          ],
                         ),
                       ),
+
+                      const SizedBox(height: 16),
+
+                      // Stream Cards using direct Column
+                      for (int i = 0; i < streams.length; i++) ...[
+                        _buildQuickStreamCard(context, streams[i]),
+                        if (i < streams.length - 1) const SizedBox(height: 10),
+                      ],
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 16),
-
-                // Stream Cards using direct Column
-                for (int i = 0; i < streams.length; i++) ...[
-                  _buildQuickStreamCard(context, streams[i]),
-                  if (i < streams.length - 1) const SizedBox(height: 10),
-                ],
-              ],
+              ),
             ),
           ),
         );
