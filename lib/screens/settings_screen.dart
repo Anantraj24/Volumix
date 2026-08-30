@@ -247,7 +247,7 @@ class SettingsScreen extends StatelessWidget {
                     title: const Text('About Volumix',
                         style: TextStyle(fontWeight: FontWeight.w600)),
                     subtitle: const Text(
-                      'Version 2.4.1 (Build 842)',
+                      'Version 1.0.0 (Build 1)',
                       style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
                     ),
                     trailing: const Icon(Icons.chevron_right_rounded,

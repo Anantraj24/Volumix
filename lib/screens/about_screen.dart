@@ -75,7 +75,7 @@ class AboutScreen extends StatelessWidget {
                 border: Border.all(color: AppColors.cardBorder),
               ),
               child: Text(
-                'Version 2.4.1 (Build 842)',
+                'Version 1.0.0 (Build 1)',
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.cyanDim,
                   fontWeight: FontWeight.w700,
