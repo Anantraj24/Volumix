@@ -5,7 +5,7 @@ import '../core/constants/app_typography.dart';
 
 class MasterVolumeDial extends StatefulWidget {
   final int percentage;
-  final ValueChanged<int> onVolumeChanged;
+  final void Function(int value, {bool isDragging}) onVolumeChanged;
   final bool isAmoled;
 
   const MasterVolumeDial({
@@ -21,22 +21,18 @@ class MasterVolumeDial extends StatefulWidget {
 
 class _MasterVolumeDialState extends State<MasterVolumeDial> {
   bool _isDragging = false;
+  int? _localDragValue;
 
-  void _handlePanUpdate(Offset localPos, Size size) {
+  void _handlePanUpdate(Offset localPos, Size size, {required bool isDragging}) {
     final center = Offset(size.width / 2, size.height / 2);
     final dx = localPos.dx - center.dx;
     final dy = localPos.dy - center.dy;
 
-    // Calculate angle in radians from -PI to PI (0 is right, PI/2 is bottom, -PI/2 is top)
-    double angle = math.atan2(dy, dx); // -PI to PI
-    // Shift so 0 is at bottom-left (-135 deg) or standard dial orientation (135 deg to 405 deg)
-    // Map -PI..PI into 0..2PI
+    double angle = math.atan2(dy, dx);
     if (angle < 0) {
       angle += 2 * math.pi;
     }
 
-    // Standard dial starting from 135 deg (3*pi/4) clockwise to 45 deg (9*pi/4)
-    // 270 deg total arc
     final startAngle = 0.75 * math.pi;
     final totalArc = 1.5 * math.pi;
 
@@ -45,41 +41,64 @@ class _MasterVolumeDialState extends State<MasterVolumeDial> {
       relativeAngle += 2 * math.pi;
     }
 
+    int pct;
     if (relativeAngle <= totalArc) {
-      final pct = ((relativeAngle / totalArc) * 100).round().clamp(0, 100);
-      widget.onVolumeChanged(pct);
+      pct = ((relativeAngle / totalArc) * 100).round().clamp(0, 100);
     } else {
-      // Near boundary: snap to 0 or 100
       if (relativeAngle > totalArc + (0.5 * math.pi - 0.25 * math.pi) / 2) {
-        widget.onVolumeChanged(0);
+        pct = 0;
       } else {
-        widget.onVolumeChanged(100);
+        pct = 100;
       }
+    }
+
+    if (pct != (_localDragValue ?? widget.percentage)) {
+      setState(() {
+        _localDragValue = pct;
+      });
+      widget.onVolumeChanged(pct, isDragging: isDragging);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final bgColor = widget.isAmoled ? AppColors.amoledBackground : AppColors.darkBackground;
-    final pct = widget.percentage.clamp(0, 100);
+    final activePct = (_isDragging && _localDragValue != null)
+        ? _localDragValue!
+        : widget.percentage.clamp(0, 100);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = math.min(constraints.maxWidth * 0.72, 260.0);
 
         return GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onPanStart: (details) {
-            setState(() => _isDragging = true);
-            _handlePanUpdate(details.localPosition, Size(size, size));
+            setState(() {
+              _isDragging = true;
+              _localDragValue = widget.percentage;
+            });
+            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
           },
           onPanUpdate: (details) {
-            _handlePanUpdate(details.localPosition, Size(size, size));
+            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
           },
           onPanEnd: (_) {
-            setState(() => _isDragging = false);
+            final finalVal = _localDragValue ?? widget.percentage;
+            setState(() {
+              _isDragging = false;
+              _localDragValue = null;
+            });
+            widget.onVolumeChanged(finalVal, isDragging: false);
+          },
+          onPanCancel: () {
+            setState(() {
+              _isDragging = false;
+              _localDragValue = null;
+            });
           },
           onTapDown: (details) {
-            _handlePanUpdate(details.localPosition, Size(size, size));
+            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: false);
           },
           child: Container(
             width: size,
@@ -96,7 +115,7 @@ class _MasterVolumeDialState extends State<MasterVolumeDial> {
             ),
             child: CustomPaint(
               painter: _MasterDialPainter(
-                percentage: pct,
+                percentage: activePct,
                 isDragging: _isDragging,
                 innerBgColor: bgColor,
               ),
@@ -105,7 +124,7 @@ class _MasterVolumeDialState extends State<MasterVolumeDial> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$pct%',
+                      '$activePct%',
                       style: AppTypography.displayLarge.copyWith(
                         color: AppColors.cyan,
                         shadows: [
@@ -154,11 +173,10 @@ class _MasterDialPainter extends CustomPainter {
     const strokeWidth = 14.0;
     final trackRadius = radius - strokeWidth / 2;
 
-    final startAngle = 0.75 * math.pi; // 135 deg
-    const sweepTotal = 1.5 * math.pi; // 270 deg
+    final startAngle = 0.75 * math.pi;
+    const sweepTotal = 1.5 * math.pi;
     final currentSweep = sweepTotal * (percentage / 100.0);
 
-    // Track Background (Dark)
     final trackPaint = Paint()
       ..color = AppColors.darkSurfaceContainer
       ..style = PaintingStyle.stroke
@@ -173,7 +191,6 @@ class _MasterDialPainter extends CustomPainter {
       trackPaint,
     );
 
-    // Active Progress Arc (Cyan Gradient)
     if (percentage > 0) {
       final rect = Rect.fromCircle(center: center, radius: trackRadius);
       final activePaint = Paint()
@@ -194,19 +211,16 @@ class _MasterDialPainter extends CustomPainter {
         activePaint,
       );
 
-      // Indicator Dot / Glow at progress tip
       final dotAngle = startAngle + currentSweep;
       final dotX = center.dx + trackRadius * math.cos(dotAngle);
       final dotY = center.dy + trackRadius * math.sin(dotAngle);
       final dotCenter = Offset(dotX, dotY);
 
-      // Outer glow
       final glowPaint = Paint()
         ..color = AppColors.cyan.withValues(alpha: isDragging ? 0.6 : 0.35)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
       canvas.drawCircle(dotCenter, 9, glowPaint);
 
-      // Dot solid
       final dotPaint = Paint()..color = AppColors.cyan;
       canvas.drawCircle(dotCenter, 6, dotPaint);
 
@@ -214,7 +228,6 @@ class _MasterDialPainter extends CustomPainter {
       canvas.drawCircle(dotCenter, 2.5, dotCorePaint);
     }
 
-    // Inner Cutout Circle for AMOLED effect
     final innerPaint = Paint()
       ..color = innerBgColor
       ..style = PaintingStyle.fill;

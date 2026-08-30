@@ -7,7 +7,7 @@ class TactileSlider extends StatefulWidget {
   final int min;
   final int max;
   final LinearGradient gradient;
-  final ValueChanged<int> onChanged;
+  final void Function(int value, {bool isDragging}) onChanged;
   final bool isEnabled;
 
   const TactileSlider({
@@ -26,25 +26,32 @@ class TactileSlider extends StatefulWidget {
 
 class _TactileSliderState extends State<TactileSlider> {
   bool _isDragging = false;
+  int? _localDragValue;
 
-  void _handleUpdate(double localDx, double width) {
+  void _handleUpdate(double localDx, double width, {required bool isDragging}) {
     if (!widget.isEnabled || width <= 0) return;
     final normalized = (localDx / width).clamp(0.0, 1.0);
     final range = widget.max - widget.min;
     final calculated = widget.min + (normalized * range).round();
     final clamped = calculated.clamp(widget.min, widget.max);
 
-    if (clamped != widget.value) {
+    if (clamped != (_localDragValue ?? widget.value)) {
       HapticFeedback.selectionClick();
-      widget.onChanged(clamped);
+      setState(() {
+        _localDragValue = clamped;
+      });
+      widget.onChanged(clamped, isDragging: isDragging);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final range = widget.max - widget.min;
+    final activeValue = (_isDragging && _localDragValue != null)
+        ? _localDragValue!
+        : widget.value;
     final ratio = range > 0
-        ? ((widget.value - widget.min) / range).clamp(0.0, 1.0)
+        ? ((activeValue - widget.min) / range).clamp(0.0, 1.0)
         : 0.0;
 
     return LayoutBuilder(
@@ -52,26 +59,42 @@ class _TactileSliderState extends State<TactileSlider> {
         final width = constraints.maxWidth;
 
         return GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onHorizontalDragStart: (details) {
             if (!widget.isEnabled) return;
-            setState(() => _isDragging = true);
-            _handleUpdate(details.localPosition.dx, width);
+            setState(() {
+              _isDragging = true;
+              _localDragValue = widget.value;
+            });
+            _handleUpdate(details.localPosition.dx, width, isDragging: true);
           },
           onHorizontalDragUpdate: (details) {
             if (!widget.isEnabled) return;
-            _handleUpdate(details.localPosition.dx, width);
+            _handleUpdate(details.localPosition.dx, width, isDragging: true);
           },
           onHorizontalDragEnd: (_) {
             if (!widget.isEnabled) return;
-            setState(() => _isDragging = false);
+            final finalVal = _localDragValue ?? widget.value;
+            setState(() {
+              _isDragging = false;
+              _localDragValue = null;
+            });
+            widget.onChanged(finalVal, isDragging: false);
+          },
+          onHorizontalDragCancel: () {
+            if (!widget.isEnabled) return;
+            setState(() {
+              _isDragging = false;
+              _localDragValue = null;
+            });
           },
           onTapDown: (details) {
             if (!widget.isEnabled) return;
-            _handleUpdate(details.localPosition.dx, width);
+            _handleUpdate(details.localPosition.dx, width, isDragging: false);
           },
           child: Container(
             height: 48,
-            color: Colors.transparent, // expand touch target to minimum 48dp
+            color: Colors.transparent,
             alignment: Alignment.center,
             child: Stack(
               clipBehavior: Clip.none,
@@ -121,7 +144,9 @@ class _TactileSliderState extends State<TactileSlider> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: widget.gradient.colors.last.withValues(alpha: _isDragging ? 0.6 : 0.3),
+                            color: widget.gradient.colors.last.withValues(
+                              alpha: _isDragging ? 0.6 : 0.3,
+                            ),
                             blurRadius: _isDragging ? 12 : 6,
                             spreadRadius: _isDragging ? 2 : 1,
                           ),

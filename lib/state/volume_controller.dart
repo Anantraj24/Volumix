@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/volume_preset.dart';
 import '../models/volume_stream.dart';
 import '../repositories/volume_repository.dart';
 
@@ -17,6 +18,12 @@ class VolumeController extends ChangeNotifier {
   Timer? _externalBannerTimer;
 
   StreamSubscription? _eventsSubscription;
+
+  // Platform call coalescing timers
+  final Map<int, Timer> _throttledStreamTimers = {};
+  final Map<int, int> _pendingStreamVolumes = {};
+  Timer? _throttledMasterTimer;
+  int? _pendingMasterPercentage;
 
   VolumeController(this._repository);
 
@@ -82,7 +89,11 @@ class VolumeController extends ChangeNotifier {
     });
   }
 
-  Future<void> setStreamVolume(int streamType, int targetVolume) async {
+  Future<void> setStreamVolume(
+    int streamType,
+    int targetVolume, {
+    bool isDragging = false,
+  }) async {
     final index = _streams.indexWhere((s) => s.streamType == streamType);
     if (index == -1) return;
 
@@ -93,7 +104,7 @@ class VolumeController extends ChangeNotifier {
         ? (((clamped - stream.minVolume) / range) * 100).round().clamp(0, 100)
         : 0;
 
-    // Optimistic UI update
+    // Immediate UI update
     _streams[index] = stream.copyWith(
       currentVolume: clamped,
       percentage: pct,
@@ -102,7 +113,25 @@ class VolumeController extends ChangeNotifier {
     _recalculateMasterPercentage();
     notifyListeners();
 
-    await _repository.setVolume(streamType, clamped);
+    if (isDragging) {
+      // Coalesce native platform call during continuous dragging
+      _pendingStreamVolumes[streamType] = clamped;
+      if (_throttledStreamTimers[streamType] == null ||
+          !_throttledStreamTimers[streamType]!.isActive) {
+        _throttledStreamTimers[streamType] =
+            Timer(const Duration(milliseconds: 35), () async {
+          final pending = _pendingStreamVolumes.remove(streamType);
+          if (pending != null) {
+            await _repository.setVolume(streamType, pending);
+          }
+        });
+      }
+    } else {
+      // Direct update when tapping or dragging ends
+      _throttledStreamTimers[streamType]?.cancel();
+      _pendingStreamVolumes.remove(streamType);
+      await _repository.setVolume(streamType, clamped);
+    }
   }
 
   Future<void> adjustStreamVolume(int streamType, int direction) async {
@@ -135,7 +164,7 @@ class VolumeController extends ChangeNotifier {
     }
   }
 
-  Future<void> setMasterVolume(int percentage) async {
+  Future<void> setMasterVolume(int percentage, {bool isDragging = false}) async {
     final clampedPct = percentage.clamp(0, 100);
     _masterPercentage = clampedPct;
 
@@ -157,11 +186,71 @@ class VolumeController extends ChangeNotifier {
     }
     notifyListeners();
 
-    await _repository.setMasterVolume(clampedPct);
+    if (isDragging) {
+      _pendingMasterPercentage = clampedPct;
+      if (_throttledMasterTimer == null || !_throttledMasterTimer!.isActive) {
+        _throttledMasterTimer = Timer(const Duration(milliseconds: 35), () async {
+          final pending = _pendingMasterPercentage;
+          if (pending != null) {
+            await _repository.setMasterVolume(pending);
+          }
+        });
+      }
+    } else {
+      _throttledMasterTimer?.cancel();
+      _pendingMasterPercentage = null;
+      await _repository.setMasterVolume(clampedPct);
+    }
+  }
+
+  Future<bool> applyPreset(VolumePreset preset) async {
+    final Map<int, int> streamVolumeMap = {};
+
+    for (int i = 0; i < _streams.length; i++) {
+      final stream = _streams[i];
+      if (!stream.isSupported) continue;
+
+      int targetPct;
+      switch (stream.streamType) {
+        case 3: // Media
+          targetPct = preset.mediaPercentage;
+          break;
+        case 2: // Ring
+          targetPct = preset.ringPercentage;
+          break;
+        case 4: // Alarm
+          targetPct = preset.alarmPercentage;
+          break;
+        case 0: // Voice Call
+          targetPct = preset.callPercentage;
+          break;
+        default:
+          targetPct = preset.mediaPercentage;
+          break;
+      }
+
+      final range = stream.maxVolume - stream.minVolume;
+      final targetVol = range > 0
+          ? (stream.minVolume + ((targetPct / 100.0) * range).round())
+              .clamp(stream.minVolume, stream.maxVolume)
+          : stream.minVolume;
+
+      streamVolumeMap[stream.streamType] = targetVol;
+
+      _streams[i] = stream.copyWith(
+        currentVolume: targetVol,
+        percentage: targetPct,
+        isMuted: targetVol <= stream.minVolume,
+      );
+    }
+
+    _recalculateMasterPercentage();
+    notifyListeners();
+
+    return await _repository.applyStreamVolumes(streamVolumeMap);
   }
 
   Future<void> muteAll() async {
-    // Snapshot current state
     await _repository.muteAll(_streams);
 
     _masterPercentage = 0;
@@ -214,6 +303,11 @@ class VolumeController extends ChangeNotifier {
   void dispose() {
     _eventsSubscription?.cancel();
     _externalBannerTimer?.cancel();
+    _throttledMasterTimer?.cancel();
+    for (final timer in _throttledStreamTimers.values) {
+      timer.cancel();
+    }
+    _throttledStreamTimers.clear();
     super.dispose();
   }
 }

@@ -7,7 +7,7 @@ import 'tactile_slider.dart';
 
 class TactileStreamCard extends StatelessWidget {
   final VolumeStream stream;
-  final ValueChanged<int> onVolumeChanged;
+  final void Function(int value, {bool isDragging}) onVolumeChanged;
   final VoidCallback onStepMinus;
   final VoidCallback onStepPlus;
   final VoidCallback onToggleMute;
@@ -50,9 +50,7 @@ class TactileStreamCard extends StatelessWidget {
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSupported
-                ? (isMuted ? AppColors.cardBorder : AppColors.cardBorder)
-                : AppColors.cardBorder,
+            color: AppColors.cardBorder,
             width: 1.0,
           ),
           boxShadow: [
