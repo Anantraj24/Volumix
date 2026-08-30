@@ -2,109 +2,127 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
+    android:orientation="vertical"
     android:background="#000000"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
-    <!-- App Icon & Title -->
+    <!-- Top Row: Icon, App Name, Percentage Badge, Action Buttons (+, -, Mute) -->
     <LinearLayout
-        android:id="@+id/notif_header_app"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_volumix_notification"
-            android:contentDescription="@string/app_name" />
-
-        <TextView
+        <!-- App Icon & Title -->
+        <LinearLayout
+            android:id="@+id/notif_header_app"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:text="@string/app_name"
-            android:textColor="#BAC9CC"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <!-- Media Volume Badge -->
-    <LinearLayout
-        android:id="@+id/notif_badge_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:background="@drawable/bg_notification_badge"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_volumix_notification"
+                android:contentDescription="@string/app_name" />
 
-        <ImageView
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:src="@drawable/ic_volume_up"
-            android:contentDescription="Media" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:text="@string/app_name"
+                android:textColor="#BAC9CC"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/notif_media_percentage"
+        <!-- Media Volume Badge with Percentage -->
+        <LinearLayout
+            android:id="@+id/notif_badge_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="Media 75%"
-            android:textColor="#00E5FF"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_notification_badge"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_volume_up"
+                android:contentDescription="Media" />
+
+            <TextView
+                android:id="@+id/notif_media_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Media 75%"
+                android:textColor="#00E5FF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Spacer -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Action Buttons: Media Minus, Plus, Mute -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/notif_btn_media_minus"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_minus"
+                android:contentDescription="@string/action_decrease"
+                android:padding="7dp" />
+
+            <ImageButton
+                android:id="@+id/notif_btn_media_plus"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_plus"
+                android:contentDescription="@string/action_increase"
+                android:padding="7dp" />
+
+            <ImageButton
+                android:id="@+id/notif_btn_media_mute"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="5dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_mute"
+                android:contentDescription="@string/action_mute"
+                android:padding="7dp" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Spacer -->
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1" />
-
-    <!-- Action Buttons: Media Minus, Plus, Mute -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <ImageButton
-            android:id="@+id/notif_btn_media_minus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_notification_action_btn"
-            android:src="@drawable/ic_minus"
-            android:contentDescription="@string/action_decrease"
-            android:padding="8dp" />
-
-        <ImageButton
-            android:id="@+id/notif_btn_media_plus"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="6dp"
-            android:background="@drawable/bg_notification_action_btn"
-            android:src="@drawable/ic_plus"
-            android:contentDescription="@string/action_increase"
-            android:padding="8dp" />
-
-        <ImageButton
-            android:id="@+id/notif_btn_media_mute"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="6dp"
-            android:background="@drawable/bg_notification_action_btn"
-            android:src="@drawable/ic_mute"
-            android:contentDescription="@string/action_mute"
-            android:padding="8dp" />
-    </LinearLayout>
+    <!-- Media Sound Scroll/Progress Bar -->
+    <ProgressBar
+        android:id="@+id/notif_collapsed_prog_media"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginTop="6dp"
+        android:max="100"
+        android:progress="75"
+        android:progressDrawable="@drawable/progress_notification_cyan" />
 </LinearLayout>

@@ -50,101 +50,109 @@ class _NotificationControlsScreenState
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
-        physics: const ClampingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section: Appearance Preview
-            _buildSectionHeader('Appearance Preview'),
-            _buildNotificationPreviewCard(),
-
-            const SizedBox(height: 24),
-
-            // Section: Volume Streams
-            _buildSectionHeader('Notification Volume Streams'),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder, width: 1),
-              ),
-              child: Column(
-                children: [
-                  _buildToggleTile(
-                    title: 'Show Media',
-                    icon: Icons.music_note_rounded,
-                    value: _currentSettings.showMedia,
-                    onChanged: (val) {
-                      _updateSettings(_currentSettings.copyWith(showMedia: val));
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildToggleTile(
-                    title: 'Show Ring',
-                    icon: Icons.notifications_active_rounded,
-                    value: _currentSettings.showRing,
-                    onChanged: (val) {
-                      _updateSettings(_currentSettings.copyWith(showRing: val));
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildToggleTile(
-                    title: 'Show Alarm',
-                    icon: Icons.alarm_rounded,
-                    value: _currentSettings.showAlarm,
-                    onChanged: (val) {
-                      _updateSettings(_currentSettings.copyWith(showAlarm: val));
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildToggleTile(
-                    title: 'Show Call',
-                    icon: Icons.phone_in_talk_rounded,
-                    value: _currentSettings.showCall,
-                    onChanged: (val) {
-                      _updateSettings(_currentSettings.copyWith(showCall: val));
-                    },
-                  ),
-                ],
-              ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 580),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Section: Appearance Preview
+                _buildSectionHeader('Live Notification Preview'),
+                _buildNotificationPreviewCard(),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // Section: Control Options
-            _buildSectionHeader('Control Options'),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.cardBorder, width: 1),
-              ),
-              child: Column(
-                children: [
-                  _buildToggleTile(
-                    title: 'Show Percentage',
-                    icon: Icons.percent_rounded,
-                    value: _currentSettings.showPercentage,
-                    onChanged: (val) {
-                      _updateSettings(
-                          _currentSettings.copyWith(showPercentage: val));
-                    },
+                // Section: Volume Streams
+                _buildSectionHeader('Notification Volume Streams'),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.cardBorder, width: 1),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildToggleTile(
-                    title: 'Show Mute Button',
-                    icon: Icons.volume_off_rounded,
-                    value: _currentSettings.showMute,
-                    onChanged: (val) {
-                      _updateSettings(_currentSettings.copyWith(showMute: val));
-                    },
+                  child: Column(
+                    children: [
+                      _buildToggleTile(
+                        title: 'Show Media',
+                        icon: Icons.music_note_rounded,
+                        value: _currentSettings.showMedia,
+                        onChanged: (val) {
+                          _updateSettings(_currentSettings.copyWith(showMedia: val));
+                        },
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildToggleTile(
+                        title: 'Show Ring',
+                        icon: Icons.notifications_active_rounded,
+                        value: _currentSettings.showRing,
+                        onChanged: (val) {
+                          _updateSettings(_currentSettings.copyWith(showRing: val));
+                        },
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildToggleTile(
+                        title: 'Show Alarm',
+                        icon: Icons.alarm_rounded,
+                        value: _currentSettings.showAlarm,
+                        onChanged: (val) {
+                          _updateSettings(_currentSettings.copyWith(showAlarm: val));
+                        },
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildToggleTile(
+                        title: 'Show Call',
+                        icon: Icons.phone_in_talk_rounded,
+                        value: _currentSettings.showCall,
+                        onChanged: (val) {
+                          _updateSettings(_currentSettings.copyWith(showCall: val));
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Section: Control Options
+                _buildSectionHeader('Control Options'),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.cardBorder, width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildToggleTile(
+                        title: 'Show Percentage',
+                        icon: Icons.percent_rounded,
+                        value: _currentSettings.showPercentage,
+                        onChanged: (val) {
+                          _updateSettings(
+                              _currentSettings.copyWith(showPercentage: val));
+                        },
+                      ),
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                      _buildToggleTile(
+                        title: 'Show Mute Button',
+                        icon: Icons.volume_off_rounded,
+                        value: _currentSettings.showMute,
+                        onChanged: (val) {
+                          _updateSettings(_currentSettings.copyWith(showMute: val));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -168,101 +176,123 @@ class _NotificationControlsScreenState
   Widget _buildNotificationPreviewCard() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: AppColors.darkSurfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row
+          // Top Row: App Icon, Volumix, Percentage Badge, -, +, Mute Action buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.darkSurfaceContainerHigh,
-                    ),
-                    child: const Icon(
-                      Icons.graphic_eq_rounded,
-                      size: 14,
-                      color: AppColors.cyan,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Volumix Control',
-                    style: AppTypography.labelSmall.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 20,
+                height: 20,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.darkSurfaceContainerHigh,
+                ),
+                child: const Icon(
+                  Icons.graphic_eq_rounded,
+                  size: 12,
+                  color: AppColors.cyan,
+                ),
               ),
+              const SizedBox(width: 6),
+              Text(
+                'Volumix',
+                style: AppTypography.labelSmall.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 8),
               if (_currentSettings.showPercentage)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.darkSurfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.cardBorder),
+                    color: AppColors.azureContainer.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: AppColors.cyanDim.withValues(alpha: 0.3)),
                   ),
-                  child: Text(
-                    'Media 75%',
-                    style: AppTypography.percentage.copyWith(
-                      color: AppColors.cyan,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.music_note_rounded, size: 10, color: AppColors.cyan),
+                      const SizedBox(width: 3),
+                      Text(
+                        'Media 75%',
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.cyan,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              const Spacer(),
+              // Minus Button
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: AppColors.darkSurfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.remove, size: 14, color: AppColors.onSurface),
+              ),
+              const SizedBox(width: 4),
+              // Plus Button
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: AppColors.darkSurfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(Icons.add, size: 14, color: AppColors.onSurface),
+              ),
+              if (_currentSettings.showMute) ...[
+                const SizedBox(width: 4),
+                // Mute Button
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: AppColors.darkSurfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.volume_off_rounded, size: 14, color: AppColors.onSurfaceVariant),
+                ),
+              ],
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
-          // Stream mini bars
-          Row(
-            children: [
-              if (_currentSettings.showMedia)
-                Expanded(
-                  child: _buildMiniStreamPreview(
-                    Icons.music_note_rounded,
-                    0.75,
-                    AppColors.azureLight,
+          // Media Sound Scroll/Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Container(
+              height: 5,
+              width: double.infinity,
+              color: AppColors.darkSurfaceContainer,
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: 0.75,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [AppColors.cyan, AppColors.azureLight],
+                    ),
                   ),
                 ),
-              if (_currentSettings.showRing)
-                Expanded(
-                  child: _buildMiniStreamPreview(
-                    Icons.notifications_active_rounded,
-                    0.60,
-                    AppColors.cyan,
-                  ),
-                ),
-              if (_currentSettings.showAlarm)
-                Expanded(
-                  child: _buildMiniStreamPreview(
-                    Icons.alarm_rounded,
-                    1.0,
-                    AppColors.violetContainer,
-                  ),
-                ),
-              if (_currentSettings.showCall)
-                Expanded(
-                  child: _buildMiniStreamPreview(
-                    Icons.phone_in_talk_rounded,
-                    0.70,
-                    AppColors.onSurfaceVariant,
-                  ),
-                ),
-            ],
+              ),
+            ),
           ),
         ],
       ),

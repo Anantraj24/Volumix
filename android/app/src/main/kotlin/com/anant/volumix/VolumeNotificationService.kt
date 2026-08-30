@@ -177,6 +177,7 @@ class VolumeNotificationService : Service() {
             val collapsedView = RemoteViews(context.packageName, R.layout.notification_volumix_collapsed).apply {
                 setTextViewText(R.id.notif_media_percentage, "Media $mediaPct%")
                 setViewVisibility(R.id.notif_badge_container, if (showPercent) View.VISIBLE else View.GONE)
+                setProgressBar(R.id.notif_collapsed_prog_media, 100, mediaPct, false)
 
                 setOnClickPendingIntent(R.id.notif_btn_media_minus, mediaMinusPending)
                 setOnClickPendingIntent(R.id.notif_btn_media_plus, mediaPlusPending)
