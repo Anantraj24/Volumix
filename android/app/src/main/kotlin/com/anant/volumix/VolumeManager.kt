@@ -21,7 +21,6 @@ class VolumeManager(private val context: Context) {
         const val PREF_NOTIF_MEDIA = "notif_show_media"
         const val PREF_NOTIF_RING = "notif_show_ring"
         const val PREF_NOTIF_ALARM = "notif_show_alarm"
-        const val PREF_NOTIF_NOTIF = "notif_show_notification"
         const val PREF_NOTIF_CALL = "notif_show_call"
         const val PREF_NOTIF_PERCENT = "notif_show_percentage"
         const val PREF_NOTIF_MUTE_BTN = "notif_show_mute_button"
@@ -116,7 +115,6 @@ class VolumeManager(private val context: Context) {
         val streams = getStreams().filter { it["isSupported"] == true }
         if (streams.isEmpty()) return 0
 
-        // Prioritize Media, Ring, Notification, Alarm for master volume computation
         val priorityStreams = streams.filter {
             val type = it["streamType"] as Int
             type == AudioManager.STREAM_MUSIC || type == AudioManager.STREAM_RING ||
@@ -126,6 +124,34 @@ class VolumeManager(private val context: Context) {
         val targetList = if (priorityStreams.isNotEmpty()) priorityStreams else streams
         val avg = targetList.map { it["percentage"] as Int }.average()
         return avg.toInt().coerceIn(0, 100)
+    }
+
+    fun getStreamPercentage(streamType: Int): Int {
+        val maxVol = try {
+            audioManager.getStreamMaxVolume(streamType)
+        } catch (e: Exception) {
+            0
+        }
+        val minVol = try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                audioManager.getStreamMinVolume(streamType)
+            } else {
+                0
+            }
+        } catch (e: Exception) {
+            0
+        }
+        val currentVol = try {
+            audioManager.getStreamVolume(streamType)
+        } catch (e: Exception) {
+            0
+        }
+        val range = maxVol - minVol
+        return if (maxVol > 0 && range > 0) {
+            (((currentVol - minVol).toDouble() / range.toDouble()) * 100.0).toInt().coerceIn(0, 100)
+        } else {
+            0
+        }
     }
 
     fun setVolume(streamType: Int, targetVolume: Int, showUi: Boolean = false): Boolean {
@@ -145,6 +171,15 @@ class VolumeManager(private val context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun applyStreamVolumes(streamMap: Map<Int, Int>): Boolean {
+        var allOk = true
+        for ((streamType, targetVol) in streamMap) {
+            val ok = setVolume(streamType, targetVol, false)
+            if (!ok) allOk = false
+        }
+        return allOk
     }
 
     fun setMasterVolume(percentage: Int): Boolean {
@@ -176,10 +211,39 @@ class VolumeManager(private val context: Context) {
         }
     }
 
-    fun adjustMasterVolume(stepPercent: Int): Boolean {
-        val currentMaster = getMasterPercentage()
-        val newMaster = (currentMaster + stepPercent).coerceIn(0, 100)
-        return setMasterVolume(newMaster)
+    fun toggleStreamMute(streamType: Int): Boolean {
+        return try {
+            val currentVol = audioManager.getStreamVolume(streamType)
+            val minVol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                audioManager.getStreamMinVolume(streamType)
+            } else {
+                0
+            }
+            val maxVol = audioManager.getStreamMaxVolume(streamType)
+            val isCurrentlyMuted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                audioManager.isStreamMute(streamType) || (currentVol <= minVol)
+            } else {
+                currentVol <= minVol
+            }
+
+            if (isCurrentlyMuted) {
+                // Restore to ~50%
+                val restoreVol = ((maxVol - minVol) * 0.5).toInt().coerceAtLeast(minVol + 1)
+                setVolume(streamType, restoreVol, false)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    audioManager.adjustStreamVolume(streamType, AudioManager.ADJUST_UNMUTE, 0)
+                }
+            } else {
+                // Mute
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    audioManager.adjustStreamVolume(streamType, AudioManager.ADJUST_MUTE, 0)
+                }
+                setVolume(streamType, minVol, false)
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun setStreamMute(streamType: Int, mute: Boolean): Boolean {
@@ -193,14 +257,13 @@ class VolumeManager(private val context: Context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val direction = if (mute) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE
                 audioManager.adjustStreamVolume(streamType, direction, 0)
+            }
+            if (mute) {
+                audioManager.setStreamVolume(streamType, minVol, 0)
             } else {
-                if (mute) {
-                    audioManager.setStreamVolume(streamType, minVol, 0)
-                } else {
-                    val maxVol = audioManager.getStreamMaxVolume(streamType)
-                    val defaultVal = (maxVol * 0.5).toInt().coerceAtLeast(1)
-                    audioManager.setStreamVolume(streamType, defaultVal, 0)
-                }
+                val maxVol = audioManager.getStreamMaxVolume(streamType)
+                val defaultVal = (maxVol * 0.5).toInt().coerceAtLeast(minVol + 1)
+                audioManager.setStreamVolume(streamType, defaultVal, 0)
             }
             true
         } catch (e: Exception) {
@@ -209,7 +272,6 @@ class VolumeManager(private val context: Context) {
     }
 
     fun muteAll(): Boolean {
-        // First, snapshot current non-zero volumes to SharedPreferences if we don't already have an un-restored snapshot
         val currentStreams = getStreams().filter { it["isSupported"] == true }
         val snapshotObj = JSONObject()
         var hasNonZero = false
@@ -227,14 +289,12 @@ class VolumeManager(private val context: Context) {
             prefs.edit().putString(PREF_SAVED_SNAPSHOT, snapshotObj.toString()).apply()
         }
 
-        // Mute all supported streams
         var allOk = true
         for (stream in currentStreams) {
             val streamType = stream["streamType"] as Int
             val minVol = stream["minVolume"] as Int
             val ok = setVolume(streamType, minVol, false)
             if (!ok) {
-                // Try adjustStreamVolume mute
                 setStreamMute(streamType, true)
             }
         }
@@ -244,7 +304,6 @@ class VolumeManager(private val context: Context) {
     fun restoreAll(): Boolean {
         val snapshotJson = prefs.getString(PREF_SAVED_SNAPSHOT, null)
         if (snapshotJson.isNullOrEmpty()) {
-            // If no snapshot exists, restore reasonable defaults (60-80%)
             return resetDefaults()
         }
 
@@ -261,7 +320,6 @@ class VolumeManager(private val context: Context) {
                 if (ok) anyRestored = true
             }
 
-            // Clear snapshot once restored
             prefs.edit().remove(PREF_SAVED_SNAPSHOT).apply()
             anyRestored
         } catch (e: Exception) {
@@ -315,7 +373,6 @@ class VolumeManager(private val context: Context) {
                 }
                 context.startActivity(intent)
             } catch (e: Exception) {
-                // Fallback to app settings
                 val intent = Intent(Settings.ACTION_SETTINGS).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }

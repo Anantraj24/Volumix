@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -46,11 +45,24 @@ class VolumeNotificationService : Service() {
 
     companion object {
         const val NOTIFICATION_ID = 1001
-        const val CHANNEL_ID = "volumix_persistent_control_v2"
+        const val CHANNEL_ID = "volumix_persistent_control_v3"
 
-        const val ACTION_DECREASE_MASTER = "com.anant.volumix.ACTION_DECREASE_MASTER"
-        const val ACTION_INCREASE_MASTER = "com.anant.volumix.ACTION_INCREASE_MASTER"
-        const val ACTION_TOGGLE_MUTE = "com.anant.volumix.ACTION_TOGGLE_MUTE"
+        // Action identifiers
+        const val ACTION_MEDIA_MINUS = "com.anant.volumix.ACTION_MEDIA_MINUS"
+        const val ACTION_MEDIA_PLUS = "com.anant.volumix.ACTION_MEDIA_PLUS"
+        const val ACTION_MEDIA_MUTE = "com.anant.volumix.ACTION_MEDIA_MUTE"
+
+        const val ACTION_RING_MINUS = "com.anant.volumix.ACTION_RING_MINUS"
+        const val ACTION_RING_PLUS = "com.anant.volumix.ACTION_RING_PLUS"
+        const val ACTION_RING_MUTE = "com.anant.volumix.ACTION_RING_MUTE"
+
+        const val ACTION_ALARM_MINUS = "com.anant.volumix.ACTION_ALARM_MINUS"
+        const val ACTION_ALARM_PLUS = "com.anant.volumix.ACTION_ALARM_PLUS"
+        const val ACTION_ALARM_MUTE = "com.anant.volumix.ACTION_ALARM_MUTE"
+
+        const val ACTION_CALL_MINUS = "com.anant.volumix.ACTION_CALL_MINUS"
+        const val ACTION_CALL_PLUS = "com.anant.volumix.ACTION_CALL_PLUS"
+        const val ACTION_CALL_MUTE = "com.anant.volumix.ACTION_CALL_MUTE"
 
         fun startService(context: Context) {
             val prefs = context.getSharedPreferences("volumix_prefs", Context.MODE_PRIVATE)
@@ -94,7 +106,7 @@ class VolumeNotificationService : Service() {
                 val channel = NotificationChannel(
                     CHANNEL_ID,
                     context.getString(R.string.notification_channel_name),
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_LOW
                 ).apply {
                     description = context.getString(R.string.notification_channel_desc)
                     setShowBadge(false)
@@ -107,21 +119,33 @@ class VolumeNotificationService : Service() {
             }
         }
 
+        private fun createActionPendingIntent(context: Context, action: String, requestCode: Int): PendingIntent {
+            val intent = Intent(context, NotificationActionReceiver::class.java).apply {
+                this.action = action
+            }
+            return PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
         private fun buildNotification(context: Context): Notification {
             createNotificationChannel(context)
 
             val vm = VolumeManager(context)
-            val masterPct = vm.getMasterPercentage()
-            val streams = vm.getStreams()
+            val mediaPct = vm.getStreamPercentage(AudioManager.STREAM_MUSIC)
+            val ringPct = vm.getStreamPercentage(AudioManager.STREAM_RING)
+            val alarmPct = vm.getStreamPercentage(AudioManager.STREAM_ALARM)
+            val callPct = vm.getStreamPercentage(AudioManager.STREAM_VOICE_CALL)
 
             val prefs = context.getSharedPreferences("volumix_prefs", Context.MODE_PRIVATE)
             val showMedia = prefs.getBoolean(VolumeManager.PREF_NOTIF_MEDIA, true)
             val showRing = prefs.getBoolean(VolumeManager.PREF_NOTIF_RING, true)
             val showAlarm = prefs.getBoolean(VolumeManager.PREF_NOTIF_ALARM, true)
-            val showNotification = prefs.getBoolean(VolumeManager.PREF_NOTIF_NOTIF, true)
-            val showCall = prefs.getBoolean(VolumeManager.PREF_NOTIF_CALL, false)
+            val showCall = prefs.getBoolean(VolumeManager.PREF_NOTIF_CALL, true)
             val showPercent = prefs.getBoolean(VolumeManager.PREF_NOTIF_PERCENT, true)
-            val showMuteBtn = prefs.getBoolean(VolumeManager.PREF_NOTIF_MUTE_BTN, true)
 
             // Content Tap Intent (Opens App)
             val appIntent = Intent(context, MainActivity::class.java).apply {
@@ -132,100 +156,79 @@ class VolumeNotificationService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Minus Action
-            val minusIntent = Intent(context, NotificationActionReceiver::class.java).apply {
-                action = ACTION_DECREASE_MASTER
-            }
-            val minusPendingIntent = PendingIntent.getBroadcast(
-                context, 1, minusIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            // Pending Intents for Actions
+            val mediaMinusPending = createActionPendingIntent(context, ACTION_MEDIA_MINUS, 10)
+            val mediaPlusPending = createActionPendingIntent(context, ACTION_MEDIA_PLUS, 11)
+            val mediaMutePending = createActionPendingIntent(context, ACTION_MEDIA_MUTE, 12)
 
-            // Plus Action
-            val plusIntent = Intent(context, NotificationActionReceiver::class.java).apply {
-                action = ACTION_INCREASE_MASTER
-            }
-            val plusPendingIntent = PendingIntent.getBroadcast(
-                context, 2, plusIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            val ringMinusPending = createActionPendingIntent(context, ACTION_RING_MINUS, 20)
+            val ringPlusPending = createActionPendingIntent(context, ACTION_RING_PLUS, 21)
+            val ringMutePending = createActionPendingIntent(context, ACTION_RING_MUTE, 22)
 
-            // Mute Action
-            val muteIntent = Intent(context, NotificationActionReceiver::class.java).apply {
-                action = ACTION_TOGGLE_MUTE
-            }
-            val mutePendingIntent = PendingIntent.getBroadcast(
-                context, 3, muteIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            val alarmMinusPending = createActionPendingIntent(context, ACTION_ALARM_MINUS, 30)
+            val alarmPlusPending = createActionPendingIntent(context, ACTION_ALARM_PLUS, 31)
+            val alarmMutePending = createActionPendingIntent(context, ACTION_ALARM_MUTE, 32)
+
+            val callMinusPending = createActionPendingIntent(context, ACTION_CALL_MINUS, 40)
+            val callPlusPending = createActionPendingIntent(context, ACTION_CALL_PLUS, 41)
+            val callMutePending = createActionPendingIntent(context, ACTION_CALL_MUTE, 42)
 
             // Collapsed RemoteViews
             val collapsedView = RemoteViews(context.packageName, R.layout.notification_volumix_collapsed).apply {
-                setTextViewText(R.id.notif_master_percentage, "$masterPct%")
+                setTextViewText(R.id.notif_media_percentage, "Media $mediaPct%")
                 setViewVisibility(R.id.notif_badge_container, if (showPercent) View.VISIBLE else View.GONE)
-                setViewVisibility(R.id.notif_btn_mute, if (showMuteBtn) View.VISIBLE else View.GONE)
 
-                setOnClickPendingIntent(R.id.notif_btn_minus, minusPendingIntent)
-                setOnClickPendingIntent(R.id.notif_btn_plus, plusPendingIntent)
-                setOnClickPendingIntent(R.id.notif_btn_mute, mutePendingIntent)
+                setOnClickPendingIntent(R.id.notif_btn_media_minus, mediaMinusPending)
+                setOnClickPendingIntent(R.id.notif_btn_media_plus, mediaPlusPending)
+                setOnClickPendingIntent(R.id.notif_btn_media_mute, mediaMutePending)
             }
 
             // Expanded RemoteViews
             val expandedView = RemoteViews(context.packageName, R.layout.notification_volumix_expanded).apply {
-                setTextViewText(R.id.notif_exp_master_percentage, "$masterPct%")
-                setViewVisibility(R.id.notif_exp_badge_container, if (showPercent) View.VISIBLE else View.GONE)
-                setViewVisibility(R.id.notif_exp_btn_mute, if (showMuteBtn) View.VISIBLE else View.GONE)
+                // Media Row
+                setViewVisibility(R.id.notif_row_media, if (showMedia) View.VISIBLE else View.GONE)
+                setTextViewText(R.id.notif_val_media, "$mediaPct%")
+                setProgressBar(R.id.notif_prog_media, 100, mediaPct, false)
+                setOnClickPendingIntent(R.id.notif_exp_media_minus, mediaMinusPending)
+                setOnClickPendingIntent(R.id.notif_exp_media_plus, mediaPlusPending)
+                setOnClickPendingIntent(R.id.notif_exp_media_mute, mediaMutePending)
 
-                setOnClickPendingIntent(R.id.notif_exp_btn_minus, minusPendingIntent)
-                setOnClickPendingIntent(R.id.notif_exp_btn_plus, plusPendingIntent)
-                setOnClickPendingIntent(R.id.notif_exp_btn_mute, mutePendingIntent)
+                // Ring Row
+                setViewVisibility(R.id.notif_row_ring, if (showRing) View.VISIBLE else View.GONE)
+                setTextViewText(R.id.notif_val_ring, "$ringPct%")
+                setProgressBar(R.id.notif_prog_ring, 100, ringPct, false)
+                setOnClickPendingIntent(R.id.notif_exp_ring_minus, ringMinusPending)
+                setOnClickPendingIntent(R.id.notif_exp_ring_plus, ringPlusPending)
+                setOnClickPendingIntent(R.id.notif_exp_ring_mute, ringMutePending)
 
-                // Populate streams in expanded layout
-                for (stream in streams) {
-                    val streamType = stream["streamType"] as Int
-                    val pct = stream["percentage"] as Int
+                // Alarm Row
+                setViewVisibility(R.id.notif_row_alarm, if (showAlarm) View.VISIBLE else View.GONE)
+                setTextViewText(R.id.notif_val_alarm, "$alarmPct%")
+                setProgressBar(R.id.notif_prog_alarm, 100, alarmPct, false)
+                setOnClickPendingIntent(R.id.notif_exp_alarm_minus, alarmMinusPending)
+                setOnClickPendingIntent(R.id.notif_exp_alarm_plus, alarmPlusPending)
+                setOnClickPendingIntent(R.id.notif_exp_alarm_mute, alarmMutePending)
 
-                    when (streamType) {
-                        AudioManager.STREAM_MUSIC -> {
-                            setViewVisibility(R.id.notif_row_media, if (showMedia) View.VISIBLE else View.GONE)
-                            setTextViewText(R.id.notif_val_media, "$pct%")
-                            setProgressBar(R.id.notif_prog_media, 100, pct, false)
-                        }
-                        AudioManager.STREAM_RING -> {
-                            setViewVisibility(R.id.notif_row_ring, if (showRing) View.VISIBLE else View.GONE)
-                            setTextViewText(R.id.notif_val_ring, "$pct%")
-                            setProgressBar(R.id.notif_prog_ring, 100, pct, false)
-                        }
-                        AudioManager.STREAM_ALARM -> {
-                            setViewVisibility(R.id.notif_row_alarm, if (showAlarm) View.VISIBLE else View.GONE)
-                            setTextViewText(R.id.notif_val_alarm, "$pct%")
-                            setProgressBar(R.id.notif_prog_alarm, 100, pct, false)
-                        }
-                        AudioManager.STREAM_NOTIFICATION -> {
-                            setViewVisibility(R.id.notif_row_notification, if (showNotification) View.VISIBLE else View.GONE)
-                            setTextViewText(R.id.notif_val_notification, "$pct%")
-                            setProgressBar(R.id.notif_prog_notification, 100, pct, false)
-                        }
-                        AudioManager.STREAM_VOICE_CALL -> {
-                            setViewVisibility(R.id.notif_row_call, if (showCall) View.VISIBLE else View.GONE)
-                            setTextViewText(R.id.notif_val_call, "$pct%")
-                            setProgressBar(R.id.notif_prog_call, 100, pct, false)
-                        }
-                    }
-                }
+                // Call Row
+                setViewVisibility(R.id.notif_row_call, if (showCall) View.VISIBLE else View.GONE)
+                setTextViewText(R.id.notif_val_call, "$callPct%")
+                setProgressBar(R.id.notif_prog_call, 100, callPct, false)
+                setOnClickPendingIntent(R.id.notif_exp_call_minus, callMinusPending)
+                setOnClickPendingIntent(R.id.notif_exp_call_plus, callPlusPending)
+                setOnClickPendingIntent(R.id.notif_exp_call_mute, callMutePending)
             }
 
             return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_volumix_notification)
                 .setContentTitle(context.getString(R.string.app_name))
-                .setContentText("Master Volume: $masterPct%")
+                .setContentText("Media: $mediaPct%")
                 .setCustomContentView(collapsedView)
                 .setCustomBigContentView(expandedView)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setContentIntent(appPendingIntent)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
         }

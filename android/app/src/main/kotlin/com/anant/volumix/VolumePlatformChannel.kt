@@ -56,6 +56,19 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)
             }
+            "applyStreamVolumes" -> {
+                val rawMap = call.argument<Map<String, Int>>("streamVolumes") ?: emptyMap()
+                val intMap = mutableMapOf<Int, Int>()
+                for ((k, v) in rawMap) {
+                    val streamType = k.toIntOrNull()
+                    if (streamType != null) {
+                        intMap[streamType] = v
+                    }
+                }
+                val ok = volumeManager.applyStreamVolumes(intMap)
+                volumeObserver.dispatchVolumeUpdate(isExternal = false)
+                result.success(ok)
+            }
             "setMasterVolume" -> {
                 val percentage = call.argument<Int>("percentage") ?: 50
                 val ok = volumeManager.setMasterVolume(percentage)
@@ -129,7 +142,6 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
                 call.argument<Boolean>("showMedia")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_MEDIA, it) }
                 call.argument<Boolean>("showRing")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_RING, it) }
                 call.argument<Boolean>("showAlarm")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_ALARM, it) }
-                call.argument<Boolean>("showNotification")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_NOTIF, it) }
                 call.argument<Boolean>("showCall")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_CALL, it) }
                 call.argument<Boolean>("showPercentage")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_PERCENT, it) }
                 call.argument<Boolean>("showMute")?.let { prefs.putBoolean(VolumeManager.PREF_NOTIF_MUTE_BTN, it) }

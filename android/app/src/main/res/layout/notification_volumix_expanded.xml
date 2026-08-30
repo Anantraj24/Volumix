@@ -9,7 +9,7 @@
     android:paddingTop="8dp"
     android:paddingBottom="10dp">
 
-    <!-- Header Row (Same as collapsed) -->
+    <!-- Header Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,100 +39,42 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Master Volume Badge -->
-        <LinearLayout
-            android:id="@+id/notif_exp_badge_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/bg_notification_badge"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_volume_up"
-                android:contentDescription="Volume" />
-
-            <TextView
-                android:id="@+id/notif_exp_master_percentage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="75%"
-                android:textColor="#00E5FF"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
         <!-- Spacer -->
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <!-- Quick Action Buttons -->
-        <LinearLayout
+        <TextView
+            android:id="@+id/notif_exp_header_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <ImageButton
-                android:id="@+id/notif_exp_btn_minus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="@drawable/bg_notification_action_btn"
-                android:src="@drawable/ic_minus"
-                android:contentDescription="@string/action_decrease"
-                android:padding="7dp" />
-
-            <ImageButton
-                android:id="@+id/notif_exp_btn_plus"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_notification_action_btn"
-                android:src="@drawable/ic_plus"
-                android:contentDescription="@string/action_increase"
-                android:padding="7dp" />
-
-            <ImageButton
-                android:id="@+id/notif_exp_btn_mute"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_notification_action_btn"
-                android:src="@drawable/ic_mute"
-                android:contentDescription="@string/action_mute"
-                android:padding="7dp" />
-        </LinearLayout>
+            android:text="VOLUME CONTROL"
+            android:textColor="#00E5FF"
+            android:textSize="11sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Divider -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="6dp"
         android:layout_marginBottom="8dp"
         android:background="#1F1F1F" />
 
-    <!-- Stream: Media -->
+    <!-- Stream 1: MEDIA -->
     <LinearLayout
         android:id="@+id/notif_row_media"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="6dp">
+        android:layout_marginBottom="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -141,41 +83,72 @@
                 android:layout_weight="1"
                 android:text="MEDIA"
                 android:textColor="#BAC9CC"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/notif_val_media"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:text="75%"
                 android:textColor="#00E5FF"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_media_minus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_minus"
+                android:contentDescription="@string/action_decrease"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_media_plus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_plus"
+                android:contentDescription="@string/action_increase"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_media_mute"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_mute"
+                android:contentDescription="@string/action_mute"
+                android:padding="6dp" />
         </LinearLayout>
 
         <ProgressBar
             android:id="@+id/notif_prog_media"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="3dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
             android:max="100"
             android:progress="75"
             android:progressDrawable="@drawable/progress_notification_cyan" />
     </LinearLayout>
 
-    <!-- Stream: Ring -->
+    <!-- Stream 2: RING -->
     <LinearLayout
         android:id="@+id/notif_row_ring"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="6dp">
+        android:layout_marginBottom="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -184,41 +157,72 @@
                 android:layout_weight="1"
                 android:text="RING"
                 android:textColor="#BAC9CC"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/notif_val_ring"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:text="60%"
-                android:textColor="#E2E2E2"
-                android:textSize="11sp"
+                android:textColor="#C3F5FF"
+                android:textSize="12sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_ring_minus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_minus"
+                android:contentDescription="@string/action_decrease"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_ring_plus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_plus"
+                android:contentDescription="@string/action_increase"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_ring_mute"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_mute"
+                android:contentDescription="@string/action_mute"
+                android:padding="6dp" />
         </LinearLayout>
 
         <ProgressBar
             android:id="@+id/notif_prog_ring"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="3dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
             android:max="100"
             android:progress="60"
             android:progressDrawable="@drawable/progress_notification_cyan" />
     </LinearLayout>
 
-    <!-- Stream: Alarm -->
+    <!-- Stream 3: ALARM -->
     <LinearLayout
         android:id="@+id/notif_row_alarm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="6dp">
+        android:layout_marginBottom="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -227,74 +231,61 @@
                 android:layout_weight="1"
                 android:text="ALARM"
                 android:textColor="#BAC9CC"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/notif_val_alarm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:text="100%"
-                android:textColor="#E2E2E2"
-                android:textSize="11sp"
+                android:textColor="#F1E9FF"
+                android:textSize="12sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_alarm_minus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_minus"
+                android:contentDescription="@string/action_decrease"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_alarm_plus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_plus"
+                android:contentDescription="@string/action_increase"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_alarm_mute"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_mute"
+                android:contentDescription="@string/action_mute"
+                android:padding="6dp" />
         </LinearLayout>
 
         <ProgressBar
             android:id="@+id/notif_prog_alarm"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="3dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
             android:max="100"
             android:progress="100"
             android:progressDrawable="@drawable/progress_notification_cyan" />
     </LinearLayout>
 
-    <!-- Stream: Notification -->
-    <LinearLayout
-        android:id="@+id/notif_row_notification"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginBottom="6dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="NOTIFICATION"
-                android:textColor="#BAC9CC"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/notif_val_notification"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="80%"
-                android:textColor="#E2E2E2"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/notif_prog_notification"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="3dp"
-            android:max="100"
-            android:progress="80"
-            android:progressDrawable="@drawable/progress_notification_cyan" />
-    </LinearLayout>
-
-    <!-- Stream: Call -->
+    <!-- Stream 4: VOICE CALL -->
     <LinearLayout
         android:id="@+id/notif_row_call"
         android:layout_width="match_parent"
@@ -304,6 +295,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
@@ -312,25 +304,55 @@
                 android:layout_weight="1"
                 android:text="VOICE CALL"
                 android:textColor="#BAC9CC"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/notif_val_call"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:text="70%"
-                android:textColor="#E2E2E2"
-                android:textSize="11sp"
+                android:textColor="#BAC9CC"
+                android:textSize="12sp"
                 android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_call_minus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_minus"
+                android:contentDescription="@string/action_decrease"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_call_plus"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_plus"
+                android:contentDescription="@string/action_increase"
+                android:padding="6dp" />
+
+            <ImageButton
+                android:id="@+id/notif_exp_call_mute"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/bg_notification_action_btn"
+                android:src="@drawable/ic_mute"
+                android:contentDescription="@string/action_mute"
+                android:padding="6dp" />
         </LinearLayout>
 
         <ProgressBar
             android:id="@+id/notif_prog_call"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="3dp"
+            android:layout_height="4dp"
+            android:layout_marginTop="4dp"
             android:max="100"
             android:progress="70"
             android:progressDrawable="@drawable/progress_notification_cyan" />

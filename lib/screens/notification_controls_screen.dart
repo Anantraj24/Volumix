@@ -63,7 +63,7 @@ class _NotificationControlsScreenState
             const SizedBox(height: 24),
 
             // Section: Volume Streams
-            _buildSectionHeader('Volume Streams'),
+            _buildSectionHeader('Notification Volume Streams'),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.cardBackground,
@@ -96,16 +96,6 @@ class _NotificationControlsScreenState
                     value: _currentSettings.showAlarm,
                     onChanged: (val) {
                       _updateSettings(_currentSettings.copyWith(showAlarm: val));
-                    },
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildToggleTile(
-                    title: 'Show Notification',
-                    icon: Icons.notifications_rounded,
-                    value: _currentSettings.showNotification,
-                    onChanged: (val) {
-                      _updateSettings(
-                          _currentSettings.copyWith(showNotification: val));
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
@@ -230,10 +220,10 @@ class _NotificationControlsScreenState
                     border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: Text(
-                    '75%',
+                    'Media 75%',
                     style: AppTypography.percentage.copyWith(
                       color: AppColors.cyan,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -268,14 +258,6 @@ class _NotificationControlsScreenState
                     Icons.alarm_rounded,
                     1.0,
                     AppColors.violetContainer,
-                  ),
-                ),
-              if (_currentSettings.showNotification)
-                Expanded(
-                  child: _buildMiniStreamPreview(
-                    Icons.notifications_rounded,
-                    0.80,
-                    AppColors.cyanDim,
                   ),
                 ),
               if (_currentSettings.showCall)

@@ -2,7 +2,6 @@ class NotificationSettings {
   final bool showMedia;
   final bool showRing;
   final bool showAlarm;
-  final bool showNotification;
   final bool showCall;
   final bool showPercentage;
   final bool showMute;
@@ -11,8 +10,7 @@ class NotificationSettings {
     this.showMedia = true,
     this.showRing = true,
     this.showAlarm = true,
-    this.showNotification = true,
-    this.showCall = false,
+    this.showCall = true,
     this.showPercentage = true,
     this.showMute = true,
   });
@@ -22,8 +20,7 @@ class NotificationSettings {
       showMedia: map['showMedia'] ?? true,
       showRing: map['showRing'] ?? true,
       showAlarm: map['showAlarm'] ?? true,
-      showNotification: map['showNotification'] ?? true,
-      showCall: map['showCall'] ?? false,
+      showCall: map['showCall'] ?? true,
       showPercentage: map['showPercentage'] ?? true,
       showMute: map['showMute'] ?? true,
     );
@@ -34,7 +31,6 @@ class NotificationSettings {
       'showMedia': showMedia,
       'showRing': showRing,
       'showAlarm': showAlarm,
-      'showNotification': showNotification,
       'showCall': showCall,
       'showPercentage': showPercentage,
       'showMute': showMute,
@@ -45,7 +41,6 @@ class NotificationSettings {
     bool? showMedia,
     bool? showRing,
     bool? showAlarm,
-    bool? showNotification,
     bool? showCall,
     bool? showPercentage,
     bool? showMute,
@@ -54,7 +49,6 @@ class NotificationSettings {
       showMedia: showMedia ?? this.showMedia,
       showRing: showRing ?? this.showRing,
       showAlarm: showAlarm ?? this.showAlarm,
-      showNotification: showNotification ?? this.showNotification,
       showCall: showCall ?? this.showCall,
       showPercentage: showPercentage ?? this.showPercentage,
       showMute: showMute ?? this.showMute,
