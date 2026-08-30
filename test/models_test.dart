@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:volumix/models/notification_settings.dart';
+import 'package:volumix/models/volume_preset.dart';
 import 'package:volumix/models/volume_snapshot.dart';
 import 'package:volumix/models/volume_stream.dart';
 
@@ -68,8 +69,7 @@ void main() {
       expect(settings.showMedia, true);
       expect(settings.showRing, true);
       expect(settings.showAlarm, true);
-      expect(settings.showNotification, true);
-      expect(settings.showCall, false);
+      expect(settings.showCall, true);
       expect(settings.showPercentage, true);
       expect(settings.showMute, true);
     });
@@ -79,7 +79,6 @@ void main() {
         showMedia: true,
         showRing: false,
         showAlarm: true,
-        showNotification: false,
         showCall: true,
         showPercentage: false,
         showMute: true,
@@ -91,10 +90,46 @@ void main() {
       expect(reconstructed.showMedia, true);
       expect(reconstructed.showRing, false);
       expect(reconstructed.showAlarm, true);
-      expect(reconstructed.showNotification, false);
       expect(reconstructed.showCall, true);
       expect(reconstructed.showPercentage, false);
       expect(reconstructed.showMute, true);
+    });
+  });
+
+  group('VolumePreset Model Tests', () {
+    test('Built-in presets are configured correctly', () {
+      expect(VolumePreset.builtInPresets.length, 4);
+      expect(VolumePreset.builtInPresets[0].name, '25%');
+      expect(VolumePreset.builtInPresets[0].mediaPercentage, 25);
+      expect(VolumePreset.builtInPresets[1].name, '50%');
+      expect(VolumePreset.builtInPresets[1].mediaPercentage, 50);
+      expect(VolumePreset.builtInPresets[2].name, '75%');
+      expect(VolumePreset.builtInPresets[2].mediaPercentage, 75);
+      expect(VolumePreset.builtInPresets[3].name, '100%');
+      expect(VolumePreset.builtInPresets[3].mediaPercentage, 100);
+    });
+
+    test('Custom preset serialization roundtrip works', () {
+      const preset = VolumePreset(
+        id: 'custom_gaming',
+        name: 'Gaming',
+        mediaPercentage: 85,
+        ringPercentage: 20,
+        alarmPercentage: 50,
+        callPercentage: 70,
+        isBuiltIn: false,
+      );
+
+      final jsonStr = preset.toJson();
+      final reconstructed = VolumePreset.fromJson(jsonStr);
+
+      expect(reconstructed.id, 'custom_gaming');
+      expect(reconstructed.name, 'Gaming');
+      expect(reconstructed.mediaPercentage, 85);
+      expect(reconstructed.ringPercentage, 20);
+      expect(reconstructed.alarmPercentage, 50);
+      expect(reconstructed.callPercentage, 70);
+      expect(reconstructed.isBuiltIn, false);
     });
   });
 

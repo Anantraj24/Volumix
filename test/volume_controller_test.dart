@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:volumix/models/notification_settings.dart';
+import 'package:volumix/models/volume_preset.dart';
 import 'package:volumix/models/volume_snapshot.dart';
 import 'package:volumix/models/volume_stream.dart';
 import 'package:volumix/repositories/volume_repository.dart';
@@ -65,6 +66,17 @@ class FakeVolumePlatformService extends Fake implements VolumePlatformService {
   }
 
   @override
+  Future<bool> applyStreamVolumes(Map<int, int> streamVolumes) async {
+    for (final entry in streamVolumes.entries) {
+      final idx = mockStreams.indexWhere((s) => s.streamType == entry.key);
+      if (idx != -1) {
+        mockStreams[idx] = mockStreams[idx].copyWith(currentVolume: entry.value);
+      }
+    }
+    return true;
+  }
+
+  @override
   Future<bool> setMasterVolume(int percentage) async {
     mockMaster = percentage;
     return true;
@@ -116,6 +128,7 @@ class FakeVolumePlatformService extends Fake implements VolumePlatformService {
 class FakePreferencesService extends Fake implements PreferencesService {
   VolumeSnapshot? _snapshot;
   bool _amoled = true;
+  List<VolumePreset> _customPresets = [];
 
   @override
   bool get isAmoledMode => _amoled;
@@ -146,6 +159,14 @@ class FakePreferencesService extends Fake implements PreferencesService {
 
   @override
   Future<void> clearSnapshot() async => _snapshot = null;
+
+  @override
+  List<VolumePreset> getCustomPresets() => _customPresets;
+
+  @override
+  Future<void> saveCustomPresets(List<VolumePreset> presets) async {
+    _customPresets = presets;
+  }
 }
 
 void main() {
@@ -180,6 +201,27 @@ void main() {
 
     expect(controller.streams.first.currentVolume, 15);
     expect(controller.streams.first.percentage, 100);
+  });
+
+  test('applyPreset calculates proper index and updates streams', () async {
+    await controller.init();
+
+    const preset50 = VolumePreset(
+      id: 'builtin_50',
+      name: '50%',
+      mediaPercentage: 50,
+      ringPercentage: 50,
+      alarmPercentage: 50,
+      callPercentage: 50,
+      isBuiltIn: true,
+    );
+
+    final ok = await controller.applyPreset(preset50);
+
+    expect(ok, true);
+    // Media max is 15, 50% is 8 (round of 7.5)
+    expect(controller.streams.first.currentVolume, 8);
+    expect(controller.streams.first.percentage, 50);
   });
 
   test('muteAll mutes all supported streams and sets hasSavedSnapshot', () async {
