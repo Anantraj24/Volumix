@@ -134,6 +134,18 @@ class VolumePlatformService {
     }
   }
 
+  Future<bool> applyStreamVolumes(Map<int, int> streamVolumes) async {
+    try {
+      final stringKeyMap = streamVolumes.map((k, v) => MapEntry(k.toString(), v));
+      final bool? ok = await _methodChannel.invokeMethod<bool>('applyStreamVolumes', {
+        'streamVolumes': stringKeyMap,
+      });
+      return ok ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> adjustStreamVolume(int streamType, int direction) async {
     try {
       final bool? ok =

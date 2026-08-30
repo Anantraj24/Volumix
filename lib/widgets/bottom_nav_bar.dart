@@ -47,15 +47,21 @@ class BottomNavBar extends StatelessWidget {
               ),
               _NavItem(
                 icon: Icons.tune_rounded,
-                label: 'Quick Controls',
+                label: 'Presets',
                 isSelected: currentIndex == 1,
                 onTap: () => _handleTap(1),
               ),
               _NavItem(
-                icon: Icons.settings_rounded,
-                label: 'Settings',
+                icon: Icons.flash_on_rounded,
+                label: 'Quick',
                 isSelected: currentIndex == 2,
                 onTap: () => _handleTap(2),
+              ),
+              _NavItem(
+                icon: Icons.settings_rounded,
+                label: 'Settings',
+                isSelected: currentIndex == 3,
+                onTap: () => _handleTap(3),
               ),
             ],
           ),
@@ -94,7 +100,7 @@ class _NavItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 20 : 16,
+          horizontal: isSelected ? 16 : 12,
           vertical: 6,
         ),
         decoration: BoxDecoration(
@@ -122,7 +128,7 @@ class _NavItem extends StatelessWidget {
             Text(
               label,
               style: AppTypography.labelSmall.copyWith(
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? AppColors.cyan : AppColors.onSurfaceVariant,
               ),

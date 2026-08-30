@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/notification_settings.dart';
+import '../models/volume_preset.dart';
 import '../models/volume_snapshot.dart';
 
 class PreferencesService {
@@ -9,6 +10,7 @@ class PreferencesService {
   static const String keyFirstRun = 'volumix_pref_first_run_completed';
   static const String keyNotificationSettings = 'volumix_pref_notification_settings';
   static const String keySavedSnapshot = 'saved_volume_snapshot';
+  static const String keyCustomPresets = 'volumix_pref_custom_presets';
 
   final SharedPreferences _prefs;
 
@@ -71,5 +73,26 @@ class PreferencesService {
 
   Future<void> clearSnapshot() async {
     await _prefs.remove(keySavedSnapshot);
+  }
+
+  List<VolumePreset> getCustomPresets() {
+    final jsonStr = _prefs.getString(keyCustomPresets);
+    if (jsonStr == null || jsonStr.isEmpty) {
+      return [];
+    }
+    try {
+      final list = jsonDecode(jsonStr) as List<dynamic>;
+      return list
+          .map((item) => VolumePreset.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> saveCustomPresets(List<VolumePreset> presets) async {
+    final rawList = presets.map((p) => p.toMap()).toList();
+    final jsonStr = jsonEncode(rawList);
+    await _prefs.setString(keyCustomPresets, jsonStr);
   }
 }

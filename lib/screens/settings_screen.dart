@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_typography.dart';
+import '../state/presets_controller.dart';
 import '../state/settings_controller.dart';
 import '../state/volume_controller.dart';
 import '../widgets/reset_confirm_dialog.dart';
 import 'about_screen.dart';
 import 'notification_controls_screen.dart';
+import 'presets_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   final SettingsController settingsController;
   final VolumeController volumeController;
+  final PresetsController presetsController;
 
   const SettingsScreen({
     super.key,
     required this.settingsController,
     required this.volumeController,
+    required this.presetsController,
   });
 
   @override
@@ -97,6 +101,44 @@ class SettingsScreen extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Section: PRESETS
+            _buildSectionHeader('Presets'),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.cardBorder, width: 1),
+              ),
+              child: ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => PresetsScreen(
+                        presetsController: presetsController,
+                        volumeController: volumeController,
+                      ),
+                    ),
+                  );
+                },
+                leading: const Icon(
+                  Icons.bookmark_added_rounded,
+                  color: AppColors.cyan,
+                ),
+                title: const Text('Manage Custom Presets',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text(
+                  'Create and configure custom volume presets',
+                  style: TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded,
+                    color: AppColors.onSurfaceVariant),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               ),
             ),
 

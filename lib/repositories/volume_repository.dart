@@ -1,4 +1,5 @@
 import '../models/notification_settings.dart';
+import '../models/volume_preset.dart';
 import '../models/volume_snapshot.dart';
 import '../models/volume_stream.dart';
 import '../services/preferences_service.dart';
@@ -31,6 +32,10 @@ class VolumeRepository {
 
   Future<bool> setMasterVolume(int percentage) async {
     return await _platformService.setMasterVolume(percentage);
+  }
+
+  Future<bool> applyStreamVolumes(Map<int, int> streamVolumes) async {
+    return await _platformService.applyStreamVolumes(streamVolumes);
   }
 
   Future<bool> adjustStreamVolume(int streamType, int direction) async {
@@ -117,4 +122,10 @@ class VolumeRepository {
 
   NotificationSettings getNotificationSettings() =>
       _preferencesService.getNotificationSettings();
+
+  List<VolumePreset> getCustomPresets() =>
+      _preferencesService.getCustomPresets();
+
+  Future<void> saveCustomPresets(List<VolumePreset> presets) =>
+      _preferencesService.saveCustomPresets(presets);
 }
