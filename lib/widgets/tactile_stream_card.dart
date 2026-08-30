@@ -5,9 +5,9 @@ import '../core/constants/audio_stream_types.dart';
 import '../models/volume_stream.dart';
 import 'tactile_slider.dart';
 
-class TactileStreamCard extends StatelessWidget {
+class TactileStreamCard extends StatefulWidget {
   final VolumeStream stream;
-  final void Function(int value, {bool isDragging}) onVolumeChanged;
+  final void Function(int percentage, {bool isDragging}) onVolumeChanged;
   final VoidCallback onStepMinus;
   final VoidCallback onStepPlus;
   final VoidCallback onToggleMute;
@@ -22,7 +22,35 @@ class TactileStreamCard extends StatelessWidget {
   });
 
   @override
+  State<TactileStreamCard> createState() => _TactileStreamCardState();
+}
+
+class _TactileStreamCardState extends State<TactileStreamCard> {
+  late final ValueNotifier<int> _percentageNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _percentageNotifier = ValueNotifier<int>(widget.stream.percentage);
+  }
+
+  @override
+  void didUpdateWidget(covariant TactileStreamCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stream.percentage != widget.stream.percentage) {
+      _percentageNotifier.value = widget.stream.percentage;
+    }
+  }
+
+  @override
+  void dispose() {
+    _percentageNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final stream = widget.stream;
     final isSupported = stream.isSupported;
     final isMuted = stream.isMuted || stream.percentage == 0;
 
@@ -80,7 +108,7 @@ class TactileStreamCard extends StatelessWidget {
                     children: [
                       // Icon Button
                       InkWell(
-                        onTap: isSupported ? onToggleMute : null,
+                        onTap: isSupported ? widget.onToggleMute : null,
                         borderRadius: BorderRadius.circular(18),
                         child: Container(
                           width: 36,
@@ -158,14 +186,19 @@ class TactileStreamCard extends StatelessWidget {
                         ),
                       ),
 
-                      // Percentage Display
-                      Text(
-                        '${stream.percentage}%',
-                        style: AppTypography.percentage.copyWith(
-                          color: primaryColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      // Percentage Display (Local ValueListenableBuilder for 120fps immediate update)
+                      ValueListenableBuilder<int>(
+                        valueListenable: _percentageNotifier,
+                        builder: (context, pct, _) {
+                          return Text(
+                            '$pct%',
+                            style: AppTypography.percentage.copyWith(
+                              color: primaryColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -177,7 +210,7 @@ class TactileStreamCard extends StatelessWidget {
                     children: [
                       // Minus Button
                       IconButton.filledTonal(
-                        onPressed: isSupported ? onStepMinus : null,
+                        onPressed: isSupported ? widget.onStepMinus : null,
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.darkSurfaceContainer,
                           foregroundColor: AppColors.onSurfaceVariant,
@@ -195,7 +228,10 @@ class TactileStreamCard extends StatelessWidget {
                           percentage: stream.percentage,
                           gradient: sliderGradient,
                           isEnabled: isSupported,
-                          onPercentageChanged: onVolumeChanged,
+                          onPercentageChanged: (pct, {bool isDragging = false}) {
+                            _percentageNotifier.value = pct;
+                            widget.onVolumeChanged(pct, isDragging: isDragging);
+                          },
                         ),
                       ),
 
@@ -203,7 +239,7 @@ class TactileStreamCard extends StatelessWidget {
 
                       // Plus Button
                       IconButton.filledTonal(
-                        onPressed: isSupported ? onStepPlus : null,
+                        onPressed: isSupported ? widget.onStepPlus : null,
                         style: IconButton.styleFrom(
                           backgroundColor: AppColors.darkSurfaceContainer,
                           foregroundColor: AppColors.onSurfaceVariant,

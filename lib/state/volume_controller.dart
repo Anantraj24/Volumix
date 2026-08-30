@@ -105,16 +105,16 @@ class VolumeController extends ChangeNotifier {
             .clamp(stream.minVolume, stream.maxVolume)
         : stream.minVolume;
 
-    // Immediate UI update with exact 1% percentage
+    // Immediate in-memory update with exact 1% percentage
     _streams[index] = stream.copyWith(
       currentVolume: targetVolume,
       percentage: clampedPct,
       isMuted: clampedPct == 0 || targetVolume <= stream.minVolume,
     );
     _recalculateMasterPercentage();
-    notifyListeners();
 
     if (isDragging) {
+      // Coalesce native platform call during continuous dragging
       _pendingStreamVolumes[streamType] = targetVolume;
       if (_throttledStreamTimers[streamType] == null ||
           !_throttledStreamTimers[streamType]!.isActive) {
@@ -127,8 +127,10 @@ class VolumeController extends ChangeNotifier {
         });
       }
     } else {
+      // Direct update and notify listeners on drag end/tap
       _throttledStreamTimers[streamType]?.cancel();
       _pendingStreamVolumes.remove(streamType);
+      notifyListeners();
       await _repository.setVolume(streamType, targetVolume);
     }
   }

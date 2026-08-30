@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../core/constants/app_colors.dart';
 
 class TactileSlider extends StatefulWidget {
@@ -24,7 +23,7 @@ class _TactileSliderState extends State<TactileSlider> {
   bool _isDragging = false;
   double? _dragRatio; // 0.0 to 1.0
 
-  void _handleUpdate(double localDx, double width, {required bool isDragging}) {
+  void _handlePointerUpdate(double localDx, double width, {required bool isDragging}) {
     if (!widget.isEnabled || width <= 0) return;
     final rawRatio = (localDx / width).clamp(0.0, 1.0);
     final pct = (rawRatio * 100.0).round().clamp(0, 100);
@@ -43,14 +42,9 @@ class _TactileSliderState extends State<TactileSlider> {
         ? _dragRatio!
         : (widget.percentage.clamp(0, 100) / 100.0);
 
-    const double thumbWidth = 24.0;
-    const double thumbHeight = 24.0;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final thumbOffset = (width * activeRatio - (thumbWidth / 2))
-            .clamp(0.0, width - thumbWidth);
 
         return RepaintBoundary(
           child: GestureDetector(
@@ -61,11 +55,11 @@ class _TactileSliderState extends State<TactileSlider> {
                 _isDragging = true;
                 _dragRatio = widget.percentage / 100.0;
               });
-              _handleUpdate(details.localPosition.dx, width, isDragging: true);
+              _handlePointerUpdate(details.localPosition.dx, width, isDragging: true);
             },
             onHorizontalDragUpdate: (details) {
               if (!widget.isEnabled) return;
-              _handleUpdate(details.localPosition.dx, width, isDragging: true);
+              _handlePointerUpdate(details.localPosition.dx, width, isDragging: true);
             },
             onHorizontalDragEnd: (_) {
               if (!widget.isEnabled) return;
@@ -87,77 +81,110 @@ class _TactileSliderState extends State<TactileSlider> {
             },
             onTapDown: (details) {
               if (!widget.isEnabled) return;
-              _handleUpdate(details.localPosition.dx, width, isDragging: false);
+              _handlePointerUpdate(details.localPosition.dx, width, isDragging: false);
             },
-            child: Container(
+            child: SizedBox(
               height: 44,
-              color: Colors.transparent,
-              alignment: Alignment.center,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.centerLeft,
-                children: [
-                  // Inactive Base Track
-                  Container(
-                    height: 8,
-                    width: width,
-                    decoration: BoxDecoration(
-                      color: AppColors.darkSurfaceContainer,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.cardBorder,
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-
-                  // Active Filled Gradient Track
-                  if (activeRatio > 0 && widget.isEnabled)
-                    Container(
-                      height: 8,
-                      width: width * activeRatio,
-                      decoration: BoxDecoration(
-                        gradient: widget.gradient,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-
-                  // Tactile Thumb Knob / Button (Accurate 1% position)
-                  if (widget.isEnabled)
-                    Positioned(
-                      left: thumbOffset,
-                      child: Container(
-                        width: thumbWidth,
-                        height: thumbHeight,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _isDragging
-                              ? Colors.white
-                              : widget.gradient.colors.first,
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2.5,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _isDragging
-                                ? widget.gradient.colors.first
-                                : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              width: width,
+              child: CustomPaint(
+                size: Size(width, 44),
+                painter: _TactileSliderPainter(
+                  ratio: activeRatio,
+                  gradient: widget.gradient,
+                  isEnabled: widget.isEnabled,
+                  isDragging: _isDragging,
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+}
+
+class _TactileSliderPainter extends CustomPainter {
+  final double ratio; // 0.0 to 1.0
+  final LinearGradient gradient;
+  final bool isEnabled;
+  final bool isDragging;
+
+  _TactileSliderPainter({
+    required this.ratio,
+    required this.gradient,
+    required this.isEnabled,
+    required this.isDragging,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double trackHeight = 8.0;
+    const double thumbRadius = 11.5;
+    final double trackY = (size.height - trackHeight) / 2.0;
+    final double width = size.width;
+
+    // 1. Draw Inactive Base Track
+    final trackRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, trackY, width, trackHeight),
+      const Radius.circular(4.0),
+    );
+    final bgPaint = Paint()
+      ..color = AppColors.darkSurfaceContainer
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(trackRect, bgPaint);
+
+    final borderPaint = Paint()
+      ..color = AppColors.cardBorder
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+    canvas.drawRRect(trackRect, borderPaint);
+
+    // 2. Draw Active Filled Gradient Track
+    if (ratio > 0 && isEnabled) {
+      final activeWidth = width * ratio;
+      final activeRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, trackY, activeWidth, trackHeight),
+        const Radius.circular(4.0),
+      );
+      final gradientPaint = Paint()
+        ..shader = gradient.createShader(Rect.fromLTWH(0, trackY, width, trackHeight))
+        ..style = PaintingStyle.fill;
+      canvas.drawRRect(activeRect, gradientPaint);
+    }
+
+    // 3. Draw Tactile Thumb Knob Button
+    if (isEnabled) {
+      final double thumbCenterX =
+          (width * ratio).clamp(thumbRadius, width - thumbRadius);
+      final double thumbCenterY = size.height / 2.0;
+      final center = Offset(thumbCenterX, thumbCenterY);
+
+      // Outer Thumb Body
+      final thumbBodyPaint = Paint()
+        ..color = isDragging ? Colors.white : gradient.colors.first
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(center, thumbRadius, thumbBodyPaint);
+
+      // Outer Crisp Ring
+      final thumbRingPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+      canvas.drawCircle(center, thumbRadius, thumbRingPaint);
+
+      // Inner Core Tactile Dot
+      final innerDotPaint = Paint()
+        ..color = isDragging ? gradient.colors.first : Colors.white
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(center, 3.5, innerDotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TactileSliderPainter oldDelegate) {
+    return oldDelegate.ratio != ratio ||
+        oldDelegate.isEnabled != isEnabled ||
+        oldDelegate.isDragging != isDragging ||
+        oldDelegate.gradient != gradient;
   }
 }
