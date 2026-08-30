@@ -160,7 +160,7 @@ class PresetsScreen extends StatelessWidget {
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-            physics: const BouncingScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

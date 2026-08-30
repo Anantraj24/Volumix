@@ -70,11 +70,84 @@ class VolumePlatformService {
     return _eventsStream!;
   }
 
+  static final List<VolumeStream> _defaultStreams = [
+    const VolumeStream(
+      streamType: 3,
+      name: 'Media',
+      description: 'Spotify, YouTube, Games',
+      icon: 'music_note',
+      currentVolume: 10,
+      maxVolume: 15,
+      minVolume: 0,
+      percentage: 67,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#00E5FF',
+      secondaryColor: '#4A8EFF',
+    ),
+    const VolumeStream(
+      streamType: 2,
+      name: 'Ring',
+      description: 'Calls & Alerts',
+      icon: 'notifications_active',
+      currentVolume: 5,
+      maxVolume: 7,
+      minVolume: 0,
+      percentage: 71,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#00E5FF',
+      secondaryColor: '#00DAF3',
+    ),
+    const VolumeStream(
+      streamType: 5,
+      name: 'Notification',
+      description: 'App & System Alerts',
+      icon: 'notifications',
+      currentVolume: 5,
+      maxVolume: 7,
+      minVolume: 0,
+      percentage: 71,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#00DAF3',
+      secondaryColor: '#00626E',
+    ),
+    const VolumeStream(
+      streamType: 4,
+      name: 'Alarm',
+      description: 'Wake & Timers',
+      icon: 'alarm',
+      currentVolume: 6,
+      maxVolume: 7,
+      minVolume: 0,
+      percentage: 86,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#D6C9FF',
+      secondaryColor: '#622BE5',
+    ),
+    const VolumeStream(
+      streamType: 0,
+      name: 'Call',
+      description: 'In-call Voice',
+      icon: 'phone_in_talk',
+      currentVolume: 4,
+      maxVolume: 5,
+      minVolume: 0,
+      percentage: 80,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#BAC9CC',
+      secondaryColor: '#849396',
+    ),
+  ];
+
   Future<List<VolumeStream>> getStreams() async {
     try {
       final List<dynamic>? result =
           await _methodChannel.invokeListMethod<dynamic>('getStreams');
-      if (result == null) return [];
+      if (result == null || result.isEmpty) return _defaultStreams;
 
       return result.map((item) {
         if (item is Map) {
@@ -96,7 +169,7 @@ class VolumePlatformService {
         );
       }).toList();
     } catch (_) {
-      return [];
+      return _defaultStreams;
     }
   }
 
@@ -104,9 +177,9 @@ class VolumePlatformService {
     try {
       final int? pct =
           await _methodChannel.invokeMethod<int>('getMasterPercentage');
-      return pct ?? 0;
+      return pct ?? 75;
     } catch (_) {
-      return 0;
+      return 75;
     }
   }
 

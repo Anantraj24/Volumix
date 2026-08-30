@@ -69,82 +69,79 @@ class _MasterVolumeDialState extends State<MasterVolumeDial> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = math.min(constraints.maxWidth * 0.72, 260.0);
+        final size = math.min(constraints.maxWidth * 0.70, 240.0);
 
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onPanStart: (details) {
-            setState(() {
-              _isDragging = true;
-              _localDragValue = widget.percentage;
-            });
-            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
-          },
-          onPanUpdate: (details) {
-            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
-          },
-          onPanEnd: (_) {
-            final finalVal = _localDragValue ?? widget.percentage;
-            setState(() {
-              _isDragging = false;
-              _localDragValue = null;
-            });
-            widget.onVolumeChanged(finalVal, isDragging: false);
-          },
-          onPanCancel: () {
-            setState(() {
-              _isDragging = false;
-              _localDragValue = null;
-            });
-          },
-          onTapDown: (details) {
-            _handlePanUpdate(details.localPosition, Size(size, size), isDragging: false);
-          },
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.cyan.withValues(alpha: _isDragging ? 0.28 : 0.15),
-                  blurRadius: _isDragging ? 50 : 36,
-                  spreadRadius: 2,
+        return RepaintBoundary(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onPanStart: (details) {
+              setState(() {
+                _isDragging = true;
+                _localDragValue = widget.percentage;
+              });
+              _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
+            },
+            onPanUpdate: (details) {
+              _handlePanUpdate(details.localPosition, Size(size, size), isDragging: true);
+            },
+            onPanEnd: (_) {
+              final finalVal = _localDragValue ?? widget.percentage;
+              setState(() {
+                _isDragging = false;
+                _localDragValue = null;
+              });
+              widget.onVolumeChanged(finalVal, isDragging: false);
+            },
+            onPanCancel: () {
+              setState(() {
+                _isDragging = false;
+                _localDragValue = null;
+              });
+            },
+            onTapDown: (details) {
+              _handlePanUpdate(details.localPosition, Size(size, size), isDragging: false);
+            },
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: bgColor,
+                border: Border.all(
+                  color: _isDragging ? AppColors.cyan : AppColors.cardBorder,
+                  width: 1.5,
                 ),
-              ],
-            ),
-            child: CustomPaint(
-              painter: _MasterDialPainter(
-                percentage: activePct,
-                isDragging: _isDragging,
-                innerBgColor: bgColor,
               ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$activePct%',
-                      style: AppTypography.displayLarge.copyWith(
-                        color: AppColors.cyan,
-                        shadows: [
-                          Shadow(
-                            color: AppColors.cyan.withValues(alpha: 0.5),
-                            blurRadius: 16,
-                          ),
-                        ],
+              child: CustomPaint(
+                painter: _MasterDialPainter(
+                  percentage: activePct,
+                  isDragging: _isDragging,
+                  innerBgColor: bgColor,
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$activePct%',
+                        style: AppTypography.displayLarge.copyWith(
+                          fontSize: 48,
+                          color: AppColors.cyan,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'MASTER',
-                      style: AppTypography.labelLarge.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                        letterSpacing: 2.5,
-                        fontWeight: FontWeight.w700,
+                      const SizedBox(height: 2),
+                      Text(
+                        'MASTER',
+                        style: AppTypography.labelLarge.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -160,6 +157,26 @@ class _MasterDialPainter extends CustomPainter {
   final bool isDragging;
   final Color innerBgColor;
 
+  static final Paint _trackPaint = Paint()
+    ..color = AppColors.darkSurfaceContainer
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 10.0
+    ..strokeCap = StrokeCap.round;
+
+  static final Paint _activePaint = Paint()
+    ..color = AppColors.cyan
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 10.0
+    ..strokeCap = StrokeCap.round;
+
+  static final Paint _dotPaint = Paint()
+    ..color = AppColors.cyan
+    ..style = PaintingStyle.fill;
+
+  static final Paint _dotCorePaint = Paint()
+    ..color = Colors.white
+    ..style = PaintingStyle.fill;
+
   _MasterDialPainter({
     required this.percentage,
     required this.isDragging,
@@ -170,45 +187,30 @@ class _MasterDialPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    const strokeWidth = 14.0;
-    final trackRadius = radius - strokeWidth / 2;
+    const strokeWidth = 10.0;
+    final trackRadius = radius - strokeWidth - 6;
 
     final startAngle = 0.75 * math.pi;
     const sweepTotal = 1.5 * math.pi;
     final currentSweep = sweepTotal * (percentage / 100.0);
 
-    final trackPaint = Paint()
-      ..color = AppColors.darkSurfaceContainer
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
+    // Inactive track arc
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: trackRadius),
       startAngle,
       sweepTotal,
       false,
-      trackPaint,
+      _trackPaint,
     );
 
+    // Active track arc
     if (percentage > 0) {
-      final rect = Rect.fromCircle(center: center, radius: trackRadius);
-      final activePaint = Paint()
-        ..shader = const SweepGradient(
-          colors: [AppColors.azureLight, AppColors.cyan, AppColors.cyanLight],
-          startAngle: 0.75 * math.pi,
-          endAngle: 2.25 * math.pi,
-        ).createShader(rect)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
-
       canvas.drawArc(
-        rect,
+        Rect.fromCircle(center: center, radius: trackRadius),
         startAngle,
         currentSweep,
         false,
-        activePaint,
+        _activePaint,
       );
 
       final dotAngle = startAngle + currentSweep;
@@ -216,22 +218,9 @@ class _MasterDialPainter extends CustomPainter {
       final dotY = center.dy + trackRadius * math.sin(dotAngle);
       final dotCenter = Offset(dotX, dotY);
 
-      final glowPaint = Paint()
-        ..color = AppColors.cyan.withValues(alpha: isDragging ? 0.6 : 0.35)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-      canvas.drawCircle(dotCenter, 9, glowPaint);
-
-      final dotPaint = Paint()..color = AppColors.cyan;
-      canvas.drawCircle(dotCenter, 6, dotPaint);
-
-      final dotCorePaint = Paint()..color = Colors.white;
-      canvas.drawCircle(dotCenter, 2.5, dotCorePaint);
+      canvas.drawCircle(dotCenter, 6, _dotPaint);
+      canvas.drawCircle(dotCenter, 2.5, _dotCorePaint);
     }
-
-    final innerPaint = Paint()
-      ..color = innerBgColor
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius - strokeWidth - 4, innerPaint);
   }
 
   @override

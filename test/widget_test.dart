@@ -7,7 +7,7 @@ import 'package:volumix/state/volume_controller.dart';
 import 'volume_controller_test.dart';
 
 void main() {
-  testWidgets('VolumixApp renders Home screen with master dial, presets bar, and streams', (tester) async {
+  testWidgets('VolumixApp renders Home screen with presets bar and streams', (tester) async {
     final platformService = FakeVolumePlatformService();
     final preferencesService = FakePreferencesService();
     final repository = VolumeRepository(
@@ -37,10 +37,6 @@ void main() {
 
     // Verify Volumix App Bar title
     expect(find.text('Volumix'), findsOneWidget);
-
-    // Verify Master volume display
-    expect(find.text('68%'), findsWidgets);
-    expect(find.text('MASTER'), findsOneWidget);
 
     // Verify Mute All and Restore All buttons
     expect(find.text('Mute All'), findsOneWidget);

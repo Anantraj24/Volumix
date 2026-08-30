@@ -43,54 +43,48 @@ class TactileStreamCard extends StatelessWidget {
       isMuted: isMuted,
     );
 
-    return Opacity(
-      opacity: isSupported ? 1.0 : 0.55,
+    return RepaintBoundary(
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppColors.cardBorder,
+            color: isSupported ? AppColors.cardBorder : AppColors.darkSurfaceContainer,
             width: 1.0,
           ),
-          boxShadow: [
-            if (isSupported && !isMuted && stream.percentage > 0)
-              BoxShadow(
-                color: primaryColor.withValues(alpha: 0.05),
-                blurRadius: 16,
-                spreadRadius: 0,
-              ),
-          ],
         ),
-        clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
             // Left Accent Color Strip
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: 0,
-              child: Container(
-                width: 4,
-                color: primaryColor,
+            if (isSupported)
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: 0,
+                child: Container(
+                  width: 3.5,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)),
+                  ),
+                ),
               ),
-            ),
 
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Top Row: Icon + Title + Description + Percentage Badge
                   Row(
                     children: [
-                      // Icon Circle
+                      // Icon Button
                       InkWell(
                         onTap: isSupported ? onToggleMute : null,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
                         child: Container(
-                          width: 40,
-                          height: 40,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isMuted
@@ -99,12 +93,12 @@ class TactileStreamCard extends StatelessWidget {
                           ),
                           child: Icon(
                             iconData,
-                            size: 22,
+                            size: 20,
                             color: primaryColor,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
 
                       // Title & Subtitle
                       Expanded(
@@ -117,24 +111,25 @@ class TactileStreamCard extends StatelessWidget {
                                   stream.name,
                                   style: AppTypography.titleMedium.copyWith(
                                     fontWeight: FontWeight.w600,
+                                    fontSize: 16,
                                     color: isSupported
                                         ? AppColors.onSurface
                                         : AppColors.outline,
                                   ),
                                 ),
                                 if (stream.isExternallyChanged) ...[
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
+                                      horizontal: 5,
+                                      vertical: 1,
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.violetContainer,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
-                                      'EXTERNAL',
+                                      'EXT',
                                       style: AppTypography.labelSmall.copyWith(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w700,
@@ -146,12 +141,13 @@ class TactileStreamCard extends StatelessWidget {
                               ],
                             ),
                             if (stream.description.isNotEmpty) ...[
-                              const SizedBox(height: 2),
+                              const SizedBox(height: 1),
                               Text(
                                 isSupported
                                     ? stream.description
                                     : 'Not supported on this device',
                                 style: AppTypography.labelSmall.copyWith(
+                                  fontSize: 11,
                                   color: isSupported
                                       ? AppColors.onSurfaceVariant
                                       : AppColors.error,
@@ -174,7 +170,7 @@ class TactileStreamCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
                   // Controls Row: Minus Button + Slider + Plus Button
                   Row(
@@ -186,12 +182,12 @@ class TactileStreamCard extends StatelessWidget {
                           backgroundColor: AppColors.darkSurfaceContainer,
                           foregroundColor: AppColors.onSurfaceVariant,
                           padding: EdgeInsets.zero,
-                          minimumSize: const Size(38, 38),
+                          minimumSize: const Size(34, 34),
                         ),
-                        icon: const Icon(Icons.remove, size: 18),
+                        icon: const Icon(Icons.remove, size: 16),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
 
                       // Tactile Gradient Slider
                       Expanded(
@@ -205,7 +201,7 @@ class TactileStreamCard extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
 
                       // Plus Button
                       IconButton.filledTonal(
@@ -214,9 +210,9 @@ class TactileStreamCard extends StatelessWidget {
                           backgroundColor: AppColors.darkSurfaceContainer,
                           foregroundColor: AppColors.onSurfaceVariant,
                           padding: EdgeInsets.zero,
-                          minimumSize: const Size(38, 38),
+                          minimumSize: const Size(34, 34),
                         ),
-                        icon: const Icon(Icons.add, size: 18),
+                        icon: const Icon(Icons.add, size: 16),
                       ),
                     ],
                   ),

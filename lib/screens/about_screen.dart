@@ -23,7 +23,7 @@ class AboutScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-        physics: const BouncingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -34,14 +34,7 @@ class AboutScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.cardBackground,
-                border: Border.all(color: AppColors.cardBorder, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.cyan.withValues(alpha: 0.15),
-                    blurRadius: 24,
-                    spreadRadius: 2,
-                  ),
-                ],
+                border: Border.all(color: AppColors.cyan, width: 1.5),
               ),
               child: const Center(
                 child: Icon(

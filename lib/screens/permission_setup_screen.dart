@@ -29,25 +29,19 @@ class PermissionSetupScreen extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Glowing Icon Container
+                  // Icon Container
                   Container(
-                    width: 100,
-                    height: 100,
+                    width: 90,
+                    height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.cyan.withValues(alpha: 0.12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.cyan.withValues(alpha: 0.3),
-                          blurRadius: 36,
-                          spreadRadius: 4,
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.cyan, width: 1.5),
                     ),
                     child: const Center(
                       child: Icon(
                         Icons.graphic_eq_rounded,
-                        size: 54,
+                        size: 48,
                         color: AppColors.cyan,
                       ),
                     ),

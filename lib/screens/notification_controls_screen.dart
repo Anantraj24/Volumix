@@ -52,7 +52,7 @@ class _NotificationControlsScreenState
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
-        physics: const BouncingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -67,7 +67,7 @@ class _NotificationControlsScreenState
             Container(
               decoration: BoxDecoration(
                 color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.cardBorder, width: 1),
               ),
               child: Column(
@@ -118,7 +118,7 @@ class _NotificationControlsScreenState
             Container(
               decoration: BoxDecoration(
                 color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.cardBorder, width: 1),
               ),
               child: Column(
@@ -169,14 +169,8 @@ class _NotificationControlsScreenState
     return Container(
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.cardBorder, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.cyan.withValues(alpha: 0.05),
-            blurRadius: 16,
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(

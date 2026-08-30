@@ -55,7 +55,7 @@ class QuickControlsScreen extends StatelessWidget {
               icon: const Icon(
                 Icons.flash_on_rounded,
                 color: AppColors.cyan,
-                size: 26,
+                size: 24,
               ),
               tooltip: 'Quick Controls',
             ),
@@ -72,15 +72,15 @@ class QuickControlsScreen extends StatelessWidget {
                 icon: const Icon(
                   Icons.settings_input_component_rounded,
                   color: AppColors.onSurfaceVariant,
-                  size: 24,
+                  size: 22,
                 ),
                 tooltip: 'Settings',
               ),
             ],
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
+            physics: const ClampingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -92,32 +92,32 @@ class QuickControlsScreen extends StatelessWidget {
                   onRestoreAll: volumeController.restoreAll,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
                 // Quick Presets Row
                 Container(
                   decoration: BoxDecoration(
                     color: AppColors.cardBackground,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppColors.cardBorder),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Row(
                     children: [
                       for (final preset in builtIns)
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 2),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () => _applyQuickPreset(context, preset),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(8),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(vertical: 7),
                                   decoration: BoxDecoration(
                                     color: AppColors.darkSurfaceContainer,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color: AppColors.cardBorder, width: 0.8),
                                   ),
                                   alignment: Alignment.center,
@@ -126,6 +126,7 @@ class QuickControlsScreen extends StatelessWidget {
                                     style: AppTypography.labelLarge.copyWith(
                                       color: AppColors.cyan,
                                       fontWeight: FontWeight.w700,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
@@ -134,22 +135,22 @@ class QuickControlsScreen extends StatelessWidget {
                           ),
                         ),
                       Padding(
-                        padding: const EdgeInsets.only(left: 4),
+                        padding: const EdgeInsets.only(left: 2),
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: onOpenPresets,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
                               decoration: BoxDecoration(
                                 color: AppColors.azureContainer.withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: AppColors.cyan.withValues(alpha: 0.3)),
                               ),
                               child: const Icon(
                                 Icons.tune_rounded,
-                                size: 16,
+                                size: 15,
                                 color: AppColors.cyan,
                               ),
                             ),
@@ -160,118 +161,156 @@ class QuickControlsScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
-                // Stream Cards
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: streams.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 14),
-                  itemBuilder: (context, index) {
-                    final stream = streams[index];
-                    final isMuted = stream.isMuted || stream.percentage == 0;
-                    final primaryColor = isMuted
-                        ? AppColors.mutedGrey
-                        : AudioStreamTypes.getStreamPrimaryColor(stream.streamType);
-                    final gradient = isMuted
-                        ? const LinearGradient(
-                            colors: [AppColors.mutedGrey, AppColors.mutedGrey])
-                        : AudioStreamTypes.getStreamSliderGradient(stream.streamType);
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBackground,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.cardBorder,
-                          width: 1.0,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          // Header Row: Icon, Title, Subtitle, Percentage
-                          Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isMuted
-                                      ? AppColors.darkSurfaceContainerHigh
-                                      : primaryColor.withValues(alpha: 0.15),
-                                ),
-                                child: Icon(
-                                  AudioStreamTypes.getStreamIcon(
-                                    stream.streamType,
-                                    isMuted: isMuted,
-                                  ),
-                                  size: 22,
-                                  color: primaryColor,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      stream.name,
-                                      style: AppTypography.titleMedium.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      stream.description,
-                                      style: AppTypography.labelSmall.copyWith(
-                                        color: AppColors.onSurfaceVariant,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                '${stream.percentage}%',
-                                style: AppTypography.percentage.copyWith(
-                                  color: primaryColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // Full Width Tactile Slider
-                          TactileSlider(
-                            value: stream.currentVolume,
-                            min: stream.minVolume,
-                            max: stream.maxVolume,
-                            gradient: gradient,
-                            onChanged: (val, {bool isDragging = false}) {
-                              volumeController.setStreamVolume(
-                                stream.streamType,
-                                val,
-                                isDragging: isDragging,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                // Stream Cards using direct Column
+                for (int i = 0; i < streams.length; i++) ...[
+                  _buildQuickStreamCard(context, streams[i]),
+                  if (i < streams.length - 1) const SizedBox(height: 10),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildQuickStreamCard(BuildContext context, dynamic stream) {
+    final isMuted = stream.isMuted || stream.percentage == 0;
+    final primaryColor = isMuted
+        ? AppColors.mutedGrey
+        : AudioStreamTypes.getStreamPrimaryColor(stream.streamType);
+    final gradient = isMuted
+        ? const LinearGradient(
+            colors: [AppColors.mutedGrey, AppColors.mutedGrey])
+        : AudioStreamTypes.getStreamSliderGradient(stream.streamType);
+
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.cardBorder,
+            width: 1.0,
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        child: Column(
+          children: [
+            // Header Row: Icon, Title, Subtitle, Percentage
+            Row(
+              children: [
+                InkWell(
+                  onTap: () {
+                    volumeController.toggleStreamMute(stream.streamType);
+                  },
+                  borderRadius: BorderRadius.circular(18),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isMuted
+                          ? AppColors.darkSurfaceContainerHigh
+                          : primaryColor.withValues(alpha: 0.15),
+                    ),
+                    child: Icon(
+                      AudioStreamTypes.getStreamIcon(
+                        stream.streamType,
+                        isMuted: isMuted,
+                      ),
+                      size: 20,
+                      color: primaryColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        stream.name,
+                        style: AppTypography.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        stream.description,
+                        style: AppTypography.labelSmall.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${stream.percentage}%',
+                  style: AppTypography.percentage.copyWith(
+                    color: primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Controls Row: Minus + Slider + Plus
+            Row(
+              children: [
+                IconButton.filledTonal(
+                  onPressed: () {
+                    volumeController.adjustStreamVolume(stream.streamType, -1);
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.darkSurfaceContainer,
+                    foregroundColor: AppColors.onSurfaceVariant,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(34, 34),
+                  ),
+                  icon: const Icon(Icons.remove, size: 16),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: TactileSlider(
+                    value: stream.currentVolume,
+                    min: stream.minVolume,
+                    max: stream.maxVolume,
+                    gradient: gradient,
+                    onChanged: (val, {bool isDragging = false}) {
+                      volumeController.setStreamVolume(
+                        stream.streamType,
+                        val,
+                        isDragging: isDragging,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 6),
+                IconButton.filledTonal(
+                  onPressed: () {
+                    volumeController.adjustStreamVolume(stream.streamType, 1);
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.darkSurfaceContainer,
+                    foregroundColor: AppColors.onSurfaceVariant,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(34, 34),
+                  ),
+                  icon: const Icon(Icons.add, size: 16),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

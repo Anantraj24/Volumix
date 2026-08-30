@@ -39,13 +39,21 @@ class AppTheme {
       colorScheme: colorScheme,
       cardColor: cardColor,
       dividerColor: AppColors.outlineVariant.withValues(alpha: 0.3),
+      splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),
+          TargetPlatform.iOS: _NoAnimationPageTransitionsBuilder(),
+          TargetPlatform.windows: _NoAnimationPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: bgColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
         titleTextStyle: const TextStyle(
-          fontSize: 24,
+          fontSize: 22,
           fontWeight: FontWeight.w700,
           color: AppColors.cyan,
           letterSpacing: -0.5,
@@ -59,8 +67,9 @@ class AppTheme {
           backgroundColor: AppColors.cyan,
           foregroundColor: AppColors.onPrimary,
           elevation: 0,
+          shadowColor: Colors.transparent,
           shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -71,9 +80,11 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.onSurface,
-          side: const BorderSide(color: AppColors.cardBorder, width: 1.5),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          side: const BorderSide(color: AppColors.cardBorder, width: 1.0),
           shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -99,20 +110,36 @@ class AppTheme {
       sliderTheme: SliderThemeData(
         activeTrackColor: AppColors.cyan,
         inactiveTrackColor: AppColors.darkSurfaceContainer,
-        trackHeight: 8,
+        trackHeight: 6,
         thumbColor: AppColors.cyan,
-        overlayColor: AppColors.cyan.withValues(alpha: 0.15),
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10, elevation: 4),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+        overlayColor: Colors.transparent,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8, elevation: 0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: cardColor,
-        elevation: 16,
+        elevation: 0,
+        shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.cardBorder, width: 1),
         ),
       ),
     );
+  }
+}
+
+class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _NoAnimationPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
   }
 }

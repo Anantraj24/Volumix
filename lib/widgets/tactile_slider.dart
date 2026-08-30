@@ -36,7 +36,6 @@ class _TactileSliderState extends State<TactileSlider> {
     final clamped = calculated.clamp(widget.min, widget.max);
 
     if (clamped != (_localDragValue ?? widget.value)) {
-      HapticFeedback.selectionClick();
       setState(() {
         _localDragValue = clamped;
       });
@@ -58,103 +57,89 @@ class _TactileSliderState extends State<TactileSlider> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onHorizontalDragStart: (details) {
-            if (!widget.isEnabled) return;
-            setState(() {
-              _isDragging = true;
-              _localDragValue = widget.value;
-            });
-            _handleUpdate(details.localPosition.dx, width, isDragging: true);
-          },
-          onHorizontalDragUpdate: (details) {
-            if (!widget.isEnabled) return;
-            _handleUpdate(details.localPosition.dx, width, isDragging: true);
-          },
-          onHorizontalDragEnd: (_) {
-            if (!widget.isEnabled) return;
-            final finalVal = _localDragValue ?? widget.value;
-            setState(() {
-              _isDragging = false;
-              _localDragValue = null;
-            });
-            widget.onChanged(finalVal, isDragging: false);
-          },
-          onHorizontalDragCancel: () {
-            if (!widget.isEnabled) return;
-            setState(() {
-              _isDragging = false;
-              _localDragValue = null;
-            });
-          },
-          onTapDown: (details) {
-            if (!widget.isEnabled) return;
-            _handleUpdate(details.localPosition.dx, width, isDragging: false);
-          },
-          child: Container(
-            height: 48,
-            color: Colors.transparent,
-            alignment: Alignment.center,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.centerLeft,
-              children: [
-                // Inactive Background Track
-                Container(
-                  height: 10,
-                  width: width,
-                  decoration: BoxDecoration(
-                    color: AppColors.darkSurfaceContainer,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-
-                // Active Filled Gradient Track
-                if (ratio > 0 && widget.isEnabled)
+        return RepaintBoundary(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: (details) {
+              if (!widget.isEnabled) return;
+              setState(() {
+                _isDragging = true;
+                _localDragValue = widget.value;
+              });
+              _handleUpdate(details.localPosition.dx, width, isDragging: true);
+            },
+            onHorizontalDragUpdate: (details) {
+              if (!widget.isEnabled) return;
+              _handleUpdate(details.localPosition.dx, width, isDragging: true);
+            },
+            onHorizontalDragEnd: (_) {
+              if (!widget.isEnabled) return;
+              final finalVal = _localDragValue ?? widget.value;
+              setState(() {
+                _isDragging = false;
+                _localDragValue = null;
+              });
+              widget.onChanged(finalVal, isDragging: false);
+            },
+            onHorizontalDragCancel: () {
+              if (!widget.isEnabled) return;
+              setState(() {
+                _isDragging = false;
+                _localDragValue = null;
+              });
+            },
+            onTapDown: (details) {
+              if (!widget.isEnabled) return;
+              _handleUpdate(details.localPosition.dx, width, isDragging: false);
+            },
+            child: Container(
+              height: 40,
+              color: Colors.transparent,
+              alignment: Alignment.center,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.centerLeft,
+                children: [
+                  // Inactive Background Track
                   Container(
-                    height: 10,
-                    width: width * ratio,
+                    height: 8,
+                    width: width,
                     decoration: BoxDecoration(
-                      gradient: widget.gradient,
-                      borderRadius: BorderRadius.circular(5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: widget.gradient.colors.last.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 0),
-                        ),
-                      ],
+                      color: AppColors.darkSurfaceContainer,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
 
-                // Thumb Knob
-                if (widget.isEnabled)
-                  Positioned(
-                    left: (width * ratio - 12).clamp(0.0, width - 24),
-                    child: Container(
-                      width: 24,
-                      height: 24,
+                  // Active Filled Gradient Track
+                  if (ratio > 0 && widget.isEnabled)
+                    Container(
+                      height: 8,
+                      width: width * ratio,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: widget.gradient.colors.last,
-                        border: Border.all(
-                          color: AppColors.amoledBackground,
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: widget.gradient.colors.last.withValues(
-                              alpha: _isDragging ? 0.6 : 0.3,
-                            ),
-                            blurRadius: _isDragging ? 12 : 6,
-                            spreadRadius: _isDragging ? 2 : 1,
-                          ),
-                        ],
+                        gradient: widget.gradient,
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                  ),
-              ],
+
+                  // Thumb Knob
+                  if (widget.isEnabled)
+                    Positioned(
+                      left: (width * ratio - 10).clamp(0.0, width - 20),
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: widget.gradient.colors.last,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         );
