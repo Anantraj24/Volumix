@@ -28,19 +28,28 @@ class AboutScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // App Icon & Identity
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.cardBackground,
-                border: Border.all(color: AppColors.cyan, width: 1.5),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.graphic_eq_rounded,
-                  size: 42,
-                  color: AppColors.cyan,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'assets/icons/app_icon.png',
+                width: 84,
+                height: 84,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 84,
+                  height: 84,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: AppColors.cardBackground,
+                    border: Border.all(color: AppColors.cyan, width: 1.5),
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.graphic_eq_rounded,
+                      size: 42,
+                      color: AppColors.cyan,
+                    ),
+                  ),
                 ),
               ),
             ),
