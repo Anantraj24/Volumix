@@ -189,15 +189,13 @@ class TactileStreamCard extends StatelessWidget {
 
                       const SizedBox(width: 6),
 
-                      // Tactile Gradient Slider
+                      // Tactile Gradient Slider (Accurate 1% Slider)
                       Expanded(
                         child: TactileSlider(
-                          value: stream.currentVolume,
-                          min: stream.minVolume,
-                          max: stream.maxVolume,
+                          percentage: stream.percentage,
                           gradient: sliderGradient,
                           isEnabled: isSupported,
-                          onChanged: onVolumeChanged,
+                          onPercentageChanged: onVolumeChanged,
                         ),
                       ),
 

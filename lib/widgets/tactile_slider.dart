@@ -3,20 +3,16 @@ import 'package:flutter/services.dart';
 import '../core/constants/app_colors.dart';
 
 class TactileSlider extends StatefulWidget {
-  final int value;
-  final int min;
-  final int max;
+  final int percentage; // 0 to 100
   final LinearGradient gradient;
-  final void Function(int value, {bool isDragging}) onChanged;
+  final void Function(int percentage, {bool isDragging}) onPercentageChanged;
   final bool isEnabled;
 
   const TactileSlider({
     super.key,
-    required this.value,
-    required this.min,
-    required this.max,
+    required this.percentage,
     required this.gradient,
-    required this.onChanged,
+    required this.onPercentageChanged,
     this.isEnabled = true,
   });
 
@@ -26,36 +22,35 @@ class TactileSlider extends StatefulWidget {
 
 class _TactileSliderState extends State<TactileSlider> {
   bool _isDragging = false;
-  int? _localDragValue;
+  double? _dragRatio; // 0.0 to 1.0
 
   void _handleUpdate(double localDx, double width, {required bool isDragging}) {
     if (!widget.isEnabled || width <= 0) return;
-    final normalized = (localDx / width).clamp(0.0, 1.0);
-    final range = widget.max - widget.min;
-    final calculated = widget.min + (normalized * range).round();
-    final clamped = calculated.clamp(widget.min, widget.max);
+    final rawRatio = (localDx / width).clamp(0.0, 1.0);
+    final pct = (rawRatio * 100.0).round().clamp(0, 100);
+    final steppedRatio = pct / 100.0;
 
-    if (clamped != (_localDragValue ?? widget.value)) {
-      setState(() {
-        _localDragValue = clamped;
-      });
-      widget.onChanged(clamped, isDragging: isDragging);
-    }
+    setState(() {
+      _dragRatio = steppedRatio;
+    });
+
+    widget.onPercentageChanged(pct, isDragging: isDragging);
   }
 
   @override
   Widget build(BuildContext context) {
-    final range = widget.max - widget.min;
-    final activeValue = (_isDragging && _localDragValue != null)
-        ? _localDragValue!
-        : widget.value;
-    final ratio = range > 0
-        ? ((activeValue - widget.min) / range).clamp(0.0, 1.0)
-        : 0.0;
+    final activeRatio = (_isDragging && _dragRatio != null)
+        ? _dragRatio!
+        : (widget.percentage.clamp(0, 100) / 100.0);
+
+    const double thumbWidth = 24.0;
+    const double thumbHeight = 24.0;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        final thumbOffset = (width * activeRatio - (thumbWidth / 2))
+            .clamp(0.0, width - thumbWidth);
 
         return RepaintBoundary(
           child: GestureDetector(
@@ -64,7 +59,7 @@ class _TactileSliderState extends State<TactileSlider> {
               if (!widget.isEnabled) return;
               setState(() {
                 _isDragging = true;
-                _localDragValue = widget.value;
+                _dragRatio = widget.percentage / 100.0;
               });
               _handleUpdate(details.localPosition.dx, width, isDragging: true);
             },
@@ -74,18 +69,20 @@ class _TactileSliderState extends State<TactileSlider> {
             },
             onHorizontalDragEnd: (_) {
               if (!widget.isEnabled) return;
-              final finalVal = _localDragValue ?? widget.value;
+              final finalPct = ((_dragRatio ?? (widget.percentage / 100.0)) * 100.0)
+                  .round()
+                  .clamp(0, 100);
               setState(() {
                 _isDragging = false;
-                _localDragValue = null;
+                _dragRatio = null;
               });
-              widget.onChanged(finalVal, isDragging: false);
+              widget.onPercentageChanged(finalPct, isDragging: false);
             },
             onHorizontalDragCancel: () {
               if (!widget.isEnabled) return;
               setState(() {
                 _isDragging = false;
-                _localDragValue = null;
+                _dragRatio = null;
               });
             },
             onTapDown: (details) {
@@ -93,47 +90,64 @@ class _TactileSliderState extends State<TactileSlider> {
               _handleUpdate(details.localPosition.dx, width, isDragging: false);
             },
             child: Container(
-              height: 38,
+              height: 44,
               color: Colors.transparent,
               alignment: Alignment.center,
               child: Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.centerLeft,
                 children: [
-                  // Inactive Background Track
+                  // Inactive Base Track
                   Container(
-                    height: 6,
+                    height: 8,
                     width: width,
                     decoration: BoxDecoration(
                       color: AppColors.darkSurfaceContainer,
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.cardBorder,
+                        width: 0.5,
+                      ),
                     ),
                   ),
 
                   // Active Filled Gradient Track
-                  if (ratio > 0 && widget.isEnabled)
+                  if (activeRatio > 0 && widget.isEnabled)
                     Container(
-                      height: 6,
-                      width: width * ratio,
+                      height: 8,
+                      width: width * activeRatio,
                       decoration: BoxDecoration(
                         gradient: widget.gradient,
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
 
-                  // Thumb Knob
+                  // Tactile Thumb Knob / Button (Accurate 1% position)
                   if (widget.isEnabled)
                     Positioned(
-                      left: (width * ratio - 9).clamp(0.0, width - 18),
+                      left: thumbOffset,
                       child: Container(
-                        width: 18,
-                        height: 18,
+                        width: thumbWidth,
+                        height: thumbHeight,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: widget.gradient.colors.last,
+                          color: _isDragging
+                              ? Colors.white
+                              : widget.gradient.colors.first,
                           border: Border.all(
                             color: Colors.white,
-                            width: 2.0,
+                            width: 2.5,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _isDragging
+                                ? widget.gradient.colors.first
+                                : Colors.white,
                           ),
                         ),
                       ),

@@ -300,14 +300,12 @@ class QuickControlsScreen extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: TactileSlider(
-                    value: stream.currentVolume,
-                    min: stream.minVolume,
-                    max: stream.maxVolume,
+                    percentage: stream.percentage,
                     gradient: gradient,
-                    onChanged: (val, {bool isDragging = false}) {
-                      volumeController.setStreamVolume(
+                    onPercentageChanged: (pct, {bool isDragging = false}) {
+                      volumeController.setStreamPercentage(
                         stream.streamType,
-                        val,
+                        pct,
                         isDragging: isDragging,
                       );
                     },

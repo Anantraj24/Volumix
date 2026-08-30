@@ -168,10 +168,10 @@ class HomeScreen extends StatelessWidget {
                   for (int i = 0; i < streams.length; i++) ...[
                     TactileStreamCard(
                       stream: streams[i],
-                      onVolumeChanged: (val, {bool isDragging = false}) {
-                        volumeController.setStreamVolume(
+                      onVolumeChanged: (pct, {bool isDragging = false}) {
+                        volumeController.setStreamPercentage(
                           streams[i].streamType,
-                          val,
+                          pct,
                           isDragging: isDragging,
                         );
                       },

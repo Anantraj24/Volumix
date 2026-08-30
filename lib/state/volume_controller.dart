@@ -89,6 +89,50 @@ class VolumeController extends ChangeNotifier {
     });
   }
 
+  Future<void> setStreamPercentage(
+    int streamType,
+    int percentage, {
+    bool isDragging = false,
+  }) async {
+    final index = _streams.indexWhere((s) => s.streamType == streamType);
+    if (index == -1) return;
+
+    final stream = _streams[index];
+    final clampedPct = percentage.clamp(0, 100);
+    final range = stream.maxVolume - stream.minVolume;
+    final targetVolume = range > 0
+        ? (stream.minVolume + ((clampedPct / 100.0) * range).round())
+            .clamp(stream.minVolume, stream.maxVolume)
+        : stream.minVolume;
+
+    // Immediate UI update with exact 1% percentage
+    _streams[index] = stream.copyWith(
+      currentVolume: targetVolume,
+      percentage: clampedPct,
+      isMuted: clampedPct == 0 || targetVolume <= stream.minVolume,
+    );
+    _recalculateMasterPercentage();
+    notifyListeners();
+
+    if (isDragging) {
+      _pendingStreamVolumes[streamType] = targetVolume;
+      if (_throttledStreamTimers[streamType] == null ||
+          !_throttledStreamTimers[streamType]!.isActive) {
+        _throttledStreamTimers[streamType] =
+            Timer(const Duration(milliseconds: 35), () async {
+          final pending = _pendingStreamVolumes.remove(streamType);
+          if (pending != null) {
+            await _repository.setVolume(streamType, pending);
+          }
+        });
+      }
+    } else {
+      _throttledStreamTimers[streamType]?.cancel();
+      _pendingStreamVolumes.remove(streamType);
+      await _repository.setVolume(streamType, targetVolume);
+    }
+  }
+
   Future<void> setStreamVolume(
     int streamType,
     int targetVolume, {
@@ -139,12 +183,11 @@ class VolumeController extends ChangeNotifier {
     if (index == -1) return;
 
     final stream = _streams[index];
-    final step = (stream.maxVolume * 0.05).ceil().clamp(1, stream.maxVolume);
-    final newVol = direction > 0
-        ? (stream.currentVolume + step).clamp(stream.minVolume, stream.maxVolume)
-        : (stream.currentVolume - step).clamp(stream.minVolume, stream.maxVolume);
+    final newPct = direction > 0
+        ? (stream.percentage + 5).clamp(0, 100)
+        : (stream.percentage - 5).clamp(0, 100);
 
-    await setStreamVolume(streamType, newVol);
+    await setStreamPercentage(streamType, newPct);
   }
 
   Future<void> toggleStreamMute(int streamType) async {
