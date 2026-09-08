@@ -141,6 +141,20 @@ class VolumePlatformService {
       primaryColor: '#BAC9CC',
       secondaryColor: '#849396',
     ),
+    const VolumeStream(
+      streamType: 1,
+      name: 'System',
+      description: 'Touch & Feedback',
+      icon: 'tune',
+      currentVolume: 4,
+      maxVolume: 7,
+      minVolume: 0,
+      percentage: 57,
+      isMuted: false,
+      isSupported: true,
+      primaryColor: '#849396',
+      secondaryColor: '#BAC9CC',
+    ),
   ];
 
   Future<List<VolumeStream>> getStreams() async {

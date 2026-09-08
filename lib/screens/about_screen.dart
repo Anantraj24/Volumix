@@ -35,7 +35,7 @@ class AboutScreen extends StatelessWidget {
                 width: 84,
                 height: 84,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
+                errorBuilder: (_, _, _) => Container(
                   width: 84,
                   height: 84,
                   decoration: BoxDecoration(
@@ -183,7 +183,7 @@ class AboutScreen extends StatelessWidget {
                       showLicensePage(
                         context: context,
                         applicationName: 'Volumix',
-                        applicationVersion: '2.4.1',
+                        applicationVersion: '1.0.0',
                         applicationIcon: const Padding(
                           padding: EdgeInsets.all(12),
                           child: Icon(Icons.graphic_eq_rounded,

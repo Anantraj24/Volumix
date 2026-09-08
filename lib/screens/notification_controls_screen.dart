@@ -299,35 +299,6 @@ class _NotificationControlsScreenState
     );
   }
 
-  Widget _buildMiniStreamPreview(IconData icon, double progress, Color color) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(height: 6),
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.darkSurfaceContainerHighest,
-              borderRadius: BorderRadius.circular(2),
-            ),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: progress,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildToggleTile({
     required String title,
     required IconData icon,

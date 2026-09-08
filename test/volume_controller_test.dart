@@ -83,6 +83,29 @@ class FakeVolumePlatformService extends Fake implements VolumePlatformService {
   }
 
   @override
+  Future<bool> adjustStreamVolume(int streamType, int direction) async {
+    final idx = mockStreams.indexWhere((s) => s.streamType == streamType);
+    if (idx != -1) {
+      final s = mockStreams[idx];
+      final current = s.currentVolume;
+      final maxVol = s.maxVolume;
+      final minVol = s.minVolume;
+      final delta = direction > 0 ? 1 : -1;
+      final newVol = (current + delta).clamp(minVol, maxVol);
+      final range = maxVol - minVol;
+      final newPct = range > 0
+          ? (((newVol - minVol) / range) * 100).round().clamp(0, 100)
+          : 0;
+      mockStreams[idx] = s.copyWith(
+        currentVolume: newVol,
+        percentage: newPct,
+        isMuted: newVol <= minVol,
+      );
+    }
+    return true;
+  }
+
+  @override
   Future<bool> setStreamMute(int streamType, bool mute) async => true;
 
   @override

@@ -184,12 +184,11 @@ class VolumeController extends ChangeNotifier {
     final index = _streams.indexWhere((s) => s.streamType == streamType);
     if (index == -1) return;
 
-    final stream = _streams[index];
-    final newPct = direction > 0
-        ? (stream.percentage + 5).clamp(0, 100)
-        : (stream.percentage - 5).clamp(0, 100);
-
-    await setStreamPercentage(streamType, newPct);
+    await _repository.adjustStreamVolume(streamType, direction);
+    final refreshed = await _repository.fetchStreams();
+    _streams = refreshed;
+    _recalculateMasterPercentage();
+    notifyListeners();
   }
 
   Future<void> toggleStreamMute(int streamType) async {
@@ -203,7 +202,9 @@ class VolumeController extends ChangeNotifier {
       await setStreamVolume(streamType, stream.minVolume);
       await _repository.setStreamMute(streamType, true);
     } else {
-      final restoreVol = (stream.maxVolume * 0.5).round().clamp(1, stream.maxVolume);
+      final range = stream.maxVolume - stream.minVolume;
+      final restoreVol = (stream.minVolume + (range * 0.5).round())
+          .clamp(stream.minVolume + 1, stream.maxVolume);
       await setStreamVolume(streamType, restoreVol);
       await _repository.setStreamMute(streamType, false);
     }
@@ -339,8 +340,12 @@ class VolumeController extends ChangeNotifier {
       _masterPercentage = 0;
       return;
     }
-    final avg = supported.map((s) => s.percentage).reduce((a, b) => a + b) /
-        supported.length;
+
+    const priorityTypes = {3, 2, 5, 4};
+    final priorityStreams = supported.where((s) => priorityTypes.contains(s.streamType)).toList();
+    final targetList = priorityStreams.isNotEmpty ? priorityStreams : supported;
+    final avg = targetList.map((s) => s.percentage).reduce((a, b) => a + b) /
+        targetList.length;
     _masterPercentage = avg.round().clamp(0, 100);
   }
 

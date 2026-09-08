@@ -64,6 +64,23 @@ class VolumeRepository {
   }
 
   Future<bool> restoreAll() async {
+    // The Dart-side snapshot is the authoritative source of truth: it is saved
+    // before the native snapshot and survives a process kill between the two
+    // writes. If the native snapshot was lost, apply the Dart snapshot directly.
+    final dartSnapshot = _preferencesService.getSavedSnapshot();
+    final nativeHasSnapshot = await _platformService.hasSavedSnapshot();
+
+    if (dartSnapshot != null &&
+        dartSnapshot.streamVolumes.isNotEmpty &&
+        !nativeHasSnapshot) {
+      final restored =
+          await _platformService.applyStreamVolumes(dartSnapshot.streamVolumes);
+      await _preferencesService.clearSnapshot();
+      return restored;
+    }
+
+    // Common path: the native snapshot exists (or neither snapshot exists, in
+    // which case native restores system defaults).
     final ok = await _platformService.restoreAll();
     if (ok) {
       await _preferencesService.clearSnapshot();

@@ -146,6 +146,7 @@ class VolumeNotificationService : Service() {
             val showAlarm = prefs.getBoolean(VolumeManager.PREF_NOTIF_ALARM, true)
             val showCall = prefs.getBoolean(VolumeManager.PREF_NOTIF_CALL, true)
             val showPercent = prefs.getBoolean(VolumeManager.PREF_NOTIF_PERCENT, true)
+            val showMute = prefs.getBoolean(VolumeManager.PREF_NOTIF_MUTE_BTN, true)
 
             // Content Tap Intent (Opens App)
             val appIntent = Intent(context, MainActivity::class.java).apply {
@@ -182,6 +183,8 @@ class VolumeNotificationService : Service() {
                 setOnClickPendingIntent(R.id.notif_btn_media_minus, mediaMinusPending)
                 setOnClickPendingIntent(R.id.notif_btn_media_plus, mediaPlusPending)
                 setOnClickPendingIntent(R.id.notif_btn_media_mute, mediaMutePending)
+                setViewVisibility(R.id.notif_btn_media_mute,
+                    if (showMute) View.VISIBLE else View.GONE)
             }
 
             // Expanded RemoteViews
@@ -193,6 +196,8 @@ class VolumeNotificationService : Service() {
                 setOnClickPendingIntent(R.id.notif_exp_media_minus, mediaMinusPending)
                 setOnClickPendingIntent(R.id.notif_exp_media_plus, mediaPlusPending)
                 setOnClickPendingIntent(R.id.notif_exp_media_mute, mediaMutePending)
+                setViewVisibility(R.id.notif_exp_media_mute,
+                    if (showMute) View.VISIBLE else View.GONE)
 
                 // Ring Row
                 setViewVisibility(R.id.notif_row_ring, if (showRing) View.VISIBLE else View.GONE)
@@ -201,6 +206,8 @@ class VolumeNotificationService : Service() {
                 setOnClickPendingIntent(R.id.notif_exp_ring_minus, ringMinusPending)
                 setOnClickPendingIntent(R.id.notif_exp_ring_plus, ringPlusPending)
                 setOnClickPendingIntent(R.id.notif_exp_ring_mute, ringMutePending)
+                setViewVisibility(R.id.notif_exp_ring_mute,
+                    if (showMute) View.VISIBLE else View.GONE)
 
                 // Alarm Row
                 setViewVisibility(R.id.notif_row_alarm, if (showAlarm) View.VISIBLE else View.GONE)
@@ -209,6 +216,8 @@ class VolumeNotificationService : Service() {
                 setOnClickPendingIntent(R.id.notif_exp_alarm_minus, alarmMinusPending)
                 setOnClickPendingIntent(R.id.notif_exp_alarm_plus, alarmPlusPending)
                 setOnClickPendingIntent(R.id.notif_exp_alarm_mute, alarmMutePending)
+                setViewVisibility(R.id.notif_exp_alarm_mute,
+                    if (showMute) View.VISIBLE else View.GONE)
 
                 // Call Row
                 setViewVisibility(R.id.notif_row_call, if (showCall) View.VISIBLE else View.GONE)
@@ -217,6 +226,8 @@ class VolumeNotificationService : Service() {
                 setOnClickPendingIntent(R.id.notif_exp_call_minus, callMinusPending)
                 setOnClickPendingIntent(R.id.notif_exp_call_plus, callPlusPending)
                 setOnClickPendingIntent(R.id.notif_exp_call_mute, callMutePending)
+                setViewVisibility(R.id.notif_exp_call_mute,
+                    if (showMute) View.VISIBLE else View.GONE)
             }
 
             return NotificationCompat.Builder(context, CHANNEL_ID)

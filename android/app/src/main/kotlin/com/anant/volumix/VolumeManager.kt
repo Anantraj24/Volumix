@@ -227,8 +227,9 @@ class VolumeManager(private val context: Context) {
             }
 
             if (isCurrentlyMuted) {
-                // Restore to ~50%
-                val restoreVol = ((maxVol - minVol) * 0.5).toInt().coerceAtLeast(minVol + 1)
+                // Restore to ~50% of the usable range (minVolume-aware).
+                val restoreVol = (minVol + (maxVol - minVol) * 0.5).toInt()
+                    .coerceIn(minVol + 1, maxVol)
                 setVolume(streamType, restoreVol, false)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     audioManager.adjustStreamVolume(streamType, AudioManager.ADJUST_UNMUTE, 0)
@@ -260,10 +261,6 @@ class VolumeManager(private val context: Context) {
             }
             if (mute) {
                 audioManager.setStreamVolume(streamType, minVol, 0)
-            } else {
-                val maxVol = audioManager.getStreamMaxVolume(streamType)
-                val defaultVal = (maxVol * 0.5).toInt().coerceAtLeast(minVol + 1)
-                audioManager.setStreamVolume(streamType, defaultVal, 0)
             }
             true
         } catch (e: Exception) {
