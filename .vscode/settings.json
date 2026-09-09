@@ -1,3 +1,6 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.jdt.ls.java.home": "E:\\jdk17\\jdk-17.0.20.1+1",
+    "gradle.java.home": "E:\\jdk17\\jdk-17.0.20.1+1",
+    "java.import.gradle.java.home": "E:\\jdk17\\jdk-17.0.20.1+1"
 }
