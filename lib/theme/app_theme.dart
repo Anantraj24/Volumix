@@ -39,7 +39,7 @@ class AppTheme {
       colorScheme: colorScheme,
       cardColor: cardColor,
       dividerColor: AppColors.outlineVariant.withValues(alpha: 0.3),
-      splashFactory: InkSparkle.constantTurbulenceSeedSplashFactory,
+      splashFactory: InkRipple.splashFactory,
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),

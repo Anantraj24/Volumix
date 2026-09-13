@@ -175,17 +175,19 @@ class PresetsScreen extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     // Quick Presets Grid
-                    GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 2.2,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: builtIns.map((preset) {
-                        return _buildQuickPresetCard(context, preset);
-                      }).toList(),
-                    ),
+                    for (var i = 0; i < builtIns.length; i += 2) ...[
+                      if (i > 0) const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: _buildQuickPresetCard(context, builtIns[i])),
+                          const SizedBox(width: 12),
+                          if (i + 1 < builtIns.length)
+                            Expanded(child: _buildQuickPresetCard(context, builtIns[i + 1]))
+                          else
+                            const Spacer(),
+                        ],
+                      ),
+                    ],
 
                     const SizedBox(height: 28),
 
@@ -258,17 +260,12 @@ class PresetsScreen extends StatelessWidget {
                           ],
                         ),
                       )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: customs.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final preset = customs[index];
-                          return _buildCustomPresetCard(context, preset);
-                        },
-                      ),
+                    else ...[
+                      for (var i = 0; i < customs.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 12),
+                        _buildCustomPresetCard(context, customs[i]),
+                      ],
+                    ],
 
                     if (customs.isNotEmpty) ...[
                       const SizedBox(height: 16),
