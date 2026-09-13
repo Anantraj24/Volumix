@@ -1,150 +1,90 @@
 # Volumix
 
-**Volumix** is a modern, high-performance, and completely offline Android system-volume controller engineered with **Flutter**, **Material 3**, and native **Kotlin Android APIs** (`AudioManager`, `ContentObserver`, and `RemoteViews` persistent foreground notifications).
+A lightweight, high-performance volume manager for Android built with Flutter and native Kotlin (`AudioManager`, `ContentObserver`, and `RemoteViews`).
 
-- **App Name**: Volumix
-- **Package Name**: `com.anant.volumix`
-- **Framework**: Flutter (Dart 3.x)
-- **Native Platform**: Android (Kotlin 2.1.0, Android SDK API 24–36, Gradle 8.14.5)
-- **Repository**: [https://github.com/Anantraj24/volumix.git](https://github.com/Anantraj24/volumix.git)
+Volumix gives you granular, real-time control over every Android audio stream with instant slider response, customizable profiles, and a persistent notification control center that works even when the screen is locked.
 
 ---
 
-## Key Features
+## Features
 
-- **Master Volume Control**: Centralized tactile circular volume dial with live percentage feedback and multi-stream scaling.
-- **Granular Stream Management**: Independent controls for all Android audio streams:
-  - 🎵 **Media**: Spotify, YouTube, Games (`STREAM_MUSIC`)
-  - 🔔 **Ring**: Phone calls & alerts (`STREAM_RING`)
-  - 💬 **Notification**: Messages & system notifications (`STREAM_NOTIFICATION`)
-  - ⏰ **Alarm**: Timers & wake alarms (`STREAM_ALARM`)
-  - 📞 **Voice Call**: In-call volume (`STREAM_VOICE_CALL`)
-  - 🎛️ **System**: Keypress and touch feedback (`STREAM_SYSTEM`)
-- **Real-Time Hardware Synchronization**: Bidirectional synchronization with physical hardware buttons, Bluetooth headsets, and external system volume panels via native `ContentObserver` and `VOLUME_CHANGED_ACTION` broadcast receivers.
-- **Mute All & Restore All**: Smart snapshot capture that saves pre-mute volume levels to local storage and restores them with a single tap.
-- **Persistent Notification Controls**: Ongoing notification widget with custom `RemoteViews` featuring quick minus, plus, and mute actions that operate even when Flutter is closed or the device is locked.
-- **Customizable Notification Streams**: Settings to choose which streams and control toggles appear in the notification drawer.
-- **AMOLED Pure Black Mode**: True `#000000` dark theme engineered to maximize battery efficiency on OLED displays.
-- **100% Offline & Private**: Zero network dependencies, zero telemetry, zero analytics. All operations are performed locally on the device hardware.
-
----
-
-## Architecture & Technology Stack
-
-```
-Flutter UI (Material 3)
-   │
-   ▼
-State Management (ChangeNotifier / Reactive Controllers)
-   │
-   ▼
-VolumeRepository (Local Cache + Platform Interface)
-   │
-   ├── MethodChannel: com.anant.volumix/volume_methods
-   └── EventChannel:  com.anant.volumix/volume_events
-   │
-   ▼
-Native Android Layer (Kotlin)
-   │
-   ├── VolumeManager (AudioManager wrapper)
-   ├── VolumeObserver (ContentObserver & BroadcastReceiver)
-   ├── VolumeNotificationService (Ongoing RemoteViews Notification)
-   └── NotificationActionReceiver (Background PendingIntent Handler)
-   │
-   ▼
-Android Audio HAL & Audio System
-```
+- **Individual Stream Control**: Independent control for all audio streams:
+  - Media (`STREAM_MUSIC`)
+  - Ringtone (`STREAM_RING`)
+  - Notifications (`STREAM_NOTIFICATION`)
+  - Alarm (`STREAM_ALARM`)
+  - Voice Call (`STREAM_VOICE_CALL`)
+  - System (`STREAM_SYSTEM`)
+- **Instant Response**: Sliders follow your touch immediately with zero lag or frame drops.
+- **Hardware Sync**: Real-time bidirectional sync with physical volume rockers, Bluetooth devices, and system volume changes.
+- **Volume Presets**: Switch instantly between pre-configured modes (Default, Media, Meeting, Silent) or create custom profiles.
+- **Persistent Notification Widget**: Control volume streams directly from your notification drawer with quick +/- and mute buttons.
+- **One-Tap Mute & Restore**: Snapshot engine saves your exact volume levels before muting and restores them with a single tap.
+- **AMOLED Dark Mode**: True `#000000` pitch black theme optimized for OLED battery efficiency.
+- **100% Offline & Private**: Zero network permissions, no telemetry, no tracking. Everything runs locally on your device.
 
 ---
 
-## System Requirements
+## Tech Stack
 
-- **Flutter SDK**: `>= 3.24.0` (Dart `>= 3.5.0`)
-- **JDK (Java Development Kit)**: **JDK 17** (or compatible JDK 17–21)
-- **Android SDK**: Android SDK API 24 (minSdk) to API 36 (compileSdk / targetSdk)
-- **Android Studio**: Android Studio Koala / Ladybug or newer with Flutter & Dart plugins installed
-- **Gradle**: 8.14.5 (configured via gradle-wrapper)
-
----
-
-## Android Studio Setup Guide
-
-1. **Open the Project**:
-   - Open **Android Studio**.
-   - Click **Open** (or `File` > `Open...`).
-   - Select the root folder `Volumix` (or the `android/` subfolder if opening as a pure Android project).
-
-2. **Configure JDK in Android Studio**:
-   - Go to **File** > **Settings** (or **Preferences** on macOS) > **Build, Execution, Deployment** > **Build Tools** > **Gradle**.
-   - Under **Gradle JVM**, ensure **JDK 17** is selected (e.g. Eclipse Adoptium 17, Oracle JDK 17, or Android Studio Embedded JDK 17).
-   - Gradle 8.14.5 is compatible with JDK 17–21.
-
-3. **Sync Project with Gradle Files**:
-   - Click the **Sync Project with Gradle Files** button (elephant icon with blue arrow) in the top toolbar.
+- **Frontend**: Flutter (Dart 3)
+- **Native Android**: Kotlin, Android SDK (API 24 - 36)
+- **Audio APIs**: `android.media.AudioManager`, `ContentObserver`
+- **UI Architecture**: ValueNotifier granular rebuilds, custom Canvas tactile sliders
 
 ---
 
-## Flutter Development & Build Commands
+## Getting Started
 
-### 1. Fetch Dependencies
+### Prerequisites
+
+- Flutter SDK `>= 3.24.0`
+- Android Studio (Koala / Ladybug or newer)
+- JDK 17
+- Android SDK (API 24 to 36)
+
+### Running the App
+
 ```bash
+# Clone the repository
+git clone https://github.com/Anantraj24/volumix.git
+cd volumix
+
+# Install dependencies
 flutter pub get
-```
 
-### 2. Run Code Analysis & Tests
-```bash
-flutter analyze
-flutter test
-```
-
-### 3. Run Locally (Emulator / USB Debugging)
-```bash
+# Run on connected device or emulator
 flutter run
 ```
 
-### 4. Build APK
+### Building Release APK
 
-#### Build Release APK:
 ```bash
 flutter build apk --release
 ```
-**Output Location:**
-```
-build/app/outputs/flutter-apk/app-release.apk
-```
 
-#### Build Debug APK:
-```bash
-flutter build apk --debug
-```
-**Output Location:**
-```
-build/app/outputs/flutter-apk/app-debug.apk
-```
+The APK will be generated at `build/app/outputs/flutter-apk/app-release.apk`.
 
-#### Build App Bundle (AAB for Google Play):
-```bash
-flutter build appbundle --release
-```
-**Output Location:**
-```
-build/app/outputs/bundle/release/app-release.aab
-```
+### Opening in Android Studio
+
+1. Open Android Studio.
+2. Select **Open** and choose the `Volumix` root directory (or the `android/` directory).
+3. Ensure Gradle JVM is configured to **JDK 17** in **Settings > Build, Execution, Deployment > Build Tools > Gradle**.
+4. Sync Gradle and run.
 
 ---
 
-## Android Permissions
+## Permissions
 
 | Permission | Purpose |
 |------------|---------|
-| `android.permission.POST_NOTIFICATIONS` | Required on Android 13+ (API 33+) to display the persistent volume notification. |
-| `android.permission.ACCESS_NOTIFICATION_POLICY` | Required to adjust ring or alarm volumes while Do Not Disturb is active. |
-| `android.permission.FOREGROUND_SERVICE` | Keeps the persistent control notification active and responsive in the background. |
-| `android.permission.FOREGROUND_SERVICE_SPECIAL_USE` | Declares the persistent audio volume control background service on Android 14+ (API 34+). |
-| `android.permission.RECEIVE_BOOT_COMPLETED` | Restores persistent notification controls after a device reboot (if enabled). |
+| `POST_NOTIFICATIONS` | Displays the persistent volume notification drawer controls (Android 13+). |
+| `ACCESS_NOTIFICATION_POLICY` | Allows adjusting stream volumes when Do Not Disturb is enabled. |
+| `FOREGROUND_SERVICE` | Keeps notification controls responsive in the background. |
+| `RECEIVE_BOOT_COMPLETED` | Restores notification controls after reboot (if enabled in settings). |
 
 ---
 
 ## License
 
-This project is licensed under the Apache 2.0 License.
+Apache License 2.0. See [LICENSE](LICENSE) for details.

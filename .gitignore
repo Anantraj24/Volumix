@@ -10,6 +10,7 @@
 local.properties
 *.log
 *.hprof
+/gradle.properties
 
 # Flutter/Dart files
 .dart_tool/
