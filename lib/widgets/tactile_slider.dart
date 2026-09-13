@@ -22,6 +22,7 @@ class TactileSlider extends StatefulWidget {
 class _TactileSliderState extends State<TactileSlider> {
   bool _isDragging = false;
   double? _dragRatio; // 0.0 to 1.0
+  int? _lastReportedPercentage;
 
   void _handlePointerUpdate(double localDx, double width, {required bool isDragging}) {
     if (!widget.isEnabled || width <= 0) return;
@@ -29,10 +30,16 @@ class _TactileSliderState extends State<TactileSlider> {
     final pct = (rawRatio * 100.0).round().clamp(0, 100);
     final steppedRatio = pct / 100.0;
 
+    if (_dragRatio == steppedRatio && _isDragging == isDragging && _lastReportedPercentage == pct) {
+      return;
+    }
+
     setState(() {
+      _isDragging = isDragging;
       _dragRatio = steppedRatio;
     });
 
+    _lastReportedPercentage = pct;
     widget.onPercentageChanged(pct, isDragging: isDragging);
   }
 
@@ -55,6 +62,7 @@ class _TactileSliderState extends State<TactileSlider> {
                 _isDragging = true;
                 _dragRatio = widget.percentage / 100.0;
               });
+              _lastReportedPercentage = widget.percentage;
               _handlePointerUpdate(details.localPosition.dx, width, isDragging: true);
             },
             onHorizontalDragUpdate: (details) {
@@ -70,6 +78,7 @@ class _TactileSliderState extends State<TactileSlider> {
                 _isDragging = false;
                 _dragRatio = null;
               });
+              _lastReportedPercentage = null;
               widget.onPercentageChanged(finalPct, isDragging: false);
             },
             onHorizontalDragCancel: () {
@@ -78,6 +87,7 @@ class _TactileSliderState extends State<TactileSlider> {
                 _isDragging = false;
                 _dragRatio = null;
               });
+              _lastReportedPercentage = null;
             },
             onTapDown: (details) {
               if (!widget.isEnabled) return;

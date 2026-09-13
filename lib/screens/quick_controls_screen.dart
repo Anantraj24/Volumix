@@ -4,6 +4,7 @@ import '../core/constants/app_colors.dart';
 import '../core/constants/app_typography.dart';
 import '../core/constants/audio_stream_types.dart';
 import '../models/volume_preset.dart';
+import '../models/volume_stream.dart';
 import '../state/presets_controller.dart';
 import '../state/settings_controller.dart';
 import '../state/volume_controller.dart';
@@ -101,12 +102,17 @@ class QuickControlsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Global Actions (Mute All / Restore All)
-                      QuickActionButtons(
-                        isAllMuted: volumeController.isAllMuted,
-                        hasSavedSnapshot: volumeController.hasSavedSnapshot,
-                        onMuteAll: volumeController.muteAll,
-                        onRestoreAll: volumeController.restoreAll,
+                      // Global Actions (Mute All / Restore All - isolated)
+                      ValueListenableBuilder<MuteSnapshotState>(
+                        valueListenable: volumeController.muteSnapshotNotifier,
+                        builder: (context, muteState, _) {
+                          return QuickActionButtons(
+                            isAllMuted: muteState.isAllMuted,
+                            hasSavedSnapshot: muteState.hasSavedSnapshot,
+                            onMuteAll: volumeController.muteAll,
+                            onRestoreAll: volumeController.restoreAll,
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 14),
@@ -180,9 +186,14 @@ class QuickControlsScreen extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Stream Cards using direct Column
+                      // Stream Cards using direct Column with Granular Listeners
                       for (int i = 0; i < streams.length; i++) ...[
-                        _buildQuickStreamCard(context, streams[i]),
+                        ValueListenableBuilder<VolumeStream>(
+                          valueListenable: volumeController.getStreamNotifier(streams[i]),
+                          builder: (context, currentStream, _) {
+                            return _buildQuickStreamCard(context, currentStream);
+                          },
+                        ),
                         if (i < streams.length - 1) const SizedBox(height: 10),
                       ],
                     ],
@@ -196,7 +207,7 @@ class QuickControlsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickStreamCard(BuildContext context, dynamic stream) {
+  Widget _buildQuickStreamCard(BuildContext context, VolumeStream stream) {
     final isMuted = stream.isMuted || stream.percentage == 0;
     final primaryColor = isMuted
         ? AppColors.mutedGrey

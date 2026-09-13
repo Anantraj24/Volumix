@@ -4,6 +4,27 @@ import '../models/volume_preset.dart';
 import '../models/volume_stream.dart';
 import '../repositories/volume_repository.dart';
 
+class MuteSnapshotState {
+  final bool isAllMuted;
+  final bool hasSavedSnapshot;
+
+  const MuteSnapshotState({
+    required this.isAllMuted,
+    required this.hasSavedSnapshot,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MuteSnapshotState &&
+          runtimeType == other.runtimeType &&
+          isAllMuted == other.isAllMuted &&
+          hasSavedSnapshot == other.hasSavedSnapshot;
+
+  @override
+  int get hashCode => Object.hash(isAllMuted, hasSavedSnapshot);
+}
+
 class VolumeController extends ChangeNotifier {
   final VolumeRepository _repository;
 
@@ -18,6 +39,16 @@ class VolumeController extends ChangeNotifier {
   Timer? _externalBannerTimer;
 
   StreamSubscription? _eventsSubscription;
+
+  // Granular state notifiers for zero full-screen rebuilds
+  final Map<int, ValueNotifier<VolumeStream>> _streamNotifiers = {};
+  late final ValueNotifier<MuteSnapshotState> muteSnapshotNotifier =
+      ValueNotifier<MuteSnapshotState>(
+    MuteSnapshotState(
+      isAllMuted: isAllMuted,
+      hasSavedSnapshot: _hasSavedSnapshot,
+    ),
+  );
 
   // Platform call coalescing timers
   final Map<int, Timer> _throttledStreamTimers = {};
@@ -35,6 +66,36 @@ class VolumeController extends ChangeNotifier {
   bool get isExternalChangeBannerVisible => _isExternalChangeBannerVisible;
   String get externalChangeStreamName => _externalChangeStreamName;
 
+  ValueListenable<VolumeStream> getStreamNotifier(VolumeStream stream) {
+    var notifier = _streamNotifiers[stream.streamType];
+    if (notifier == null) {
+      notifier = ValueNotifier<VolumeStream>(stream);
+      _streamNotifiers[stream.streamType] = notifier;
+    }
+    return notifier;
+  }
+
+  void _updateStreamNotifier(VolumeStream stream) {
+    final notifier = _streamNotifiers[stream.streamType];
+    if (notifier != null) {
+      if (notifier.value != stream) {
+        notifier.value = stream;
+      }
+    } else {
+      _streamNotifiers[stream.streamType] = ValueNotifier<VolumeStream>(stream);
+    }
+  }
+
+  void _updateMuteSnapshotNotifier() {
+    final state = MuteSnapshotState(
+      isAllMuted: isAllMuted,
+      hasSavedSnapshot: _hasSavedSnapshot,
+    );
+    if (muteSnapshotNotifier.value != state) {
+      muteSnapshotNotifier.value = state;
+    }
+  }
+
   bool get isAllMuted {
     final supported = _streams.filterSupported();
     if (supported.isEmpty) return false;
@@ -51,8 +112,12 @@ class VolumeController extends ChangeNotifier {
       final hasSnap = await _repository.hasSavedSnapshot();
 
       _streams = initialStreams;
+      for (final s in initialStreams) {
+        _updateStreamNotifier(s);
+      }
       _masterPercentage = master;
       _hasSavedSnapshot = hasSnap;
+      _updateMuteSnapshotNotifier();
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -67,12 +132,16 @@ class VolumeController extends ChangeNotifier {
 
       if (event.streams.isNotEmpty) {
         _streams = event.streams;
+        for (final s in event.streams) {
+          _updateStreamNotifier(s);
+        }
       }
 
       if (event.isExternal) {
         _showExternalBanner('Hardware Volume Button / External System');
       }
 
+      _updateMuteSnapshotNotifier();
       notifyListeners();
     });
   }
@@ -106,12 +175,15 @@ class VolumeController extends ChangeNotifier {
         : stream.minVolume;
 
     // Immediate in-memory update with exact 1% percentage
-    _streams[index] = stream.copyWith(
+    final updatedStream = stream.copyWith(
       currentVolume: targetVolume,
       percentage: clampedPct,
       isMuted: clampedPct == 0 || targetVolume <= stream.minVolume,
     );
+    _streams[index] = updatedStream;
+    _updateStreamNotifier(updatedStream);
     _recalculateMasterPercentage();
+    _updateMuteSnapshotNotifier();
 
     if (isDragging) {
       // Coalesce native platform call during continuous dragging
@@ -119,7 +191,7 @@ class VolumeController extends ChangeNotifier {
       if (_throttledStreamTimers[streamType] == null ||
           !_throttledStreamTimers[streamType]!.isActive) {
         _throttledStreamTimers[streamType] =
-            Timer(const Duration(milliseconds: 35), () async {
+            Timer(const Duration(milliseconds: 40), () async {
           final pending = _pendingStreamVolumes.remove(streamType);
           if (pending != null) {
             await _repository.setVolume(streamType, pending);
@@ -151,12 +223,15 @@ class VolumeController extends ChangeNotifier {
         : 0;
 
     // Immediate UI update
-    _streams[index] = stream.copyWith(
+    final updatedStream = stream.copyWith(
       currentVolume: clamped,
       percentage: pct,
       isMuted: clamped <= stream.minVolume,
     );
+    _streams[index] = updatedStream;
+    _updateStreamNotifier(updatedStream);
     _recalculateMasterPercentage();
+    _updateMuteSnapshotNotifier();
     notifyListeners();
 
     if (isDragging) {
@@ -165,7 +240,7 @@ class VolumeController extends ChangeNotifier {
       if (_throttledStreamTimers[streamType] == null ||
           !_throttledStreamTimers[streamType]!.isActive) {
         _throttledStreamTimers[streamType] =
-            Timer(const Duration(milliseconds: 35), () async {
+            Timer(const Duration(milliseconds: 40), () async {
           final pending = _pendingStreamVolumes.remove(streamType);
           if (pending != null) {
             await _repository.setVolume(streamType, pending);
@@ -187,7 +262,11 @@ class VolumeController extends ChangeNotifier {
     await _repository.adjustStreamVolume(streamType, direction);
     final refreshed = await _repository.fetchStreams();
     _streams = refreshed;
+    for (final s in refreshed) {
+      _updateStreamNotifier(s);
+    }
     _recalculateMasterPercentage();
+    _updateMuteSnapshotNotifier();
     notifyListeners();
   }
 
@@ -222,20 +301,23 @@ class VolumeController extends ChangeNotifier {
         if (range > 0) {
           final target = stream.minVolume +
               ((clampedPct / 100.0) * range).round().clamp(0, range);
-          _streams[i] = stream.copyWith(
+          final updated = stream.copyWith(
             currentVolume: target,
             percentage: clampedPct,
             isMuted: clampedPct == 0,
           );
+          _streams[i] = updated;
+          _updateStreamNotifier(updated);
         }
       }
     }
+    _updateMuteSnapshotNotifier();
     notifyListeners();
 
     if (isDragging) {
       _pendingMasterPercentage = clampedPct;
       if (_throttledMasterTimer == null || !_throttledMasterTimer!.isActive) {
-        _throttledMasterTimer = Timer(const Duration(milliseconds: 35), () async {
+        _throttledMasterTimer = Timer(const Duration(milliseconds: 40), () async {
           final pending = _pendingMasterPercentage;
           if (pending != null) {
             await _repository.setMasterVolume(pending);
@@ -283,14 +365,17 @@ class VolumeController extends ChangeNotifier {
 
       streamVolumeMap[stream.streamType] = targetVol;
 
-      _streams[i] = stream.copyWith(
+      final updated = stream.copyWith(
         currentVolume: targetVol,
         percentage: targetPct,
         isMuted: targetVol <= stream.minVolume,
       );
+      _streams[i] = updated;
+      _updateStreamNotifier(updated);
     }
 
     _recalculateMasterPercentage();
+    _updateMuteSnapshotNotifier();
     notifyListeners();
 
     return await _repository.applyStreamVolumes(streamVolumeMap);
@@ -303,14 +388,17 @@ class VolumeController extends ChangeNotifier {
     for (int i = 0; i < _streams.length; i++) {
       final stream = _streams[i];
       if (stream.isSupported) {
-        _streams[i] = stream.copyWith(
+        final updated = stream.copyWith(
           currentVolume: stream.minVolume,
           percentage: 0,
           isMuted: true,
         );
+        _streams[i] = updated;
+        _updateStreamNotifier(updated);
       }
     }
     _hasSavedSnapshot = true;
+    _updateMuteSnapshotNotifier();
     notifyListeners();
   }
 
@@ -320,7 +408,11 @@ class VolumeController extends ChangeNotifier {
       _hasSavedSnapshot = false;
       final refreshed = await _repository.fetchStreams();
       _streams = refreshed;
+      for (final s in refreshed) {
+        _updateStreamNotifier(s);
+      }
       _recalculateMasterPercentage();
+      _updateMuteSnapshotNotifier();
       notifyListeners();
     }
   }
@@ -330,7 +422,11 @@ class VolumeController extends ChangeNotifier {
     _hasSavedSnapshot = false;
     final refreshed = await _repository.fetchStreams();
     _streams = refreshed;
+    for (final s in refreshed) {
+      _updateStreamNotifier(s);
+    }
     _recalculateMasterPercentage();
+    _updateMuteSnapshotNotifier();
     notifyListeners();
   }
 
@@ -358,6 +454,11 @@ class VolumeController extends ChangeNotifier {
       timer.cancel();
     }
     _throttledStreamTimers.clear();
+    for (final notifier in _streamNotifiers.values) {
+      notifier.dispose();
+    }
+    _streamNotifiers.clear();
+    muteSnapshotNotifier.dispose();
     super.dispose();
   }
 }

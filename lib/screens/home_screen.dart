@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../core/constants/app_typography.dart';
 import '../models/volume_preset.dart';
+import '../models/volume_stream.dart';
 import '../state/presets_controller.dart';
 import '../state/settings_controller.dart';
 import '../state/volume_controller.dart';
@@ -122,12 +123,17 @@ class HomeScreen extends StatelessWidget {
                       onFixInSettings: settingsController.openDndSettings,
                     ),
 
-                  // Mute All / Restore All Action Buttons
-                  QuickActionButtons(
-                    isAllMuted: volumeController.isAllMuted,
-                    hasSavedSnapshot: volumeController.hasSavedSnapshot,
-                    onMuteAll: volumeController.muteAll,
-                    onRestoreAll: volumeController.restoreAll,
+                  // Mute All / Restore All Action Buttons (Granularly isolated)
+                  ValueListenableBuilder<MuteSnapshotState>(
+                    valueListenable: volumeController.muteSnapshotNotifier,
+                    builder: (context, muteState, _) {
+                      return QuickActionButtons(
+                        isAllMuted: muteState.isAllMuted,
+                        hasSavedSnapshot: muteState.hasSavedSnapshot,
+                        onMuteAll: volumeController.muteAll,
+                        onRestoreAll: volumeController.restoreAll,
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 12),
@@ -166,29 +172,34 @@ class HomeScreen extends StatelessWidget {
 
                   // Direct Column of Granular Volume Streams
                   for (int i = 0; i < streams.length; i++) ...[
-                    TactileStreamCard(
-                      stream: streams[i],
-                      onVolumeChanged: (pct, {bool isDragging = false}) {
-                        volumeController.setStreamPercentage(
-                          streams[i].streamType,
-                          pct,
-                          isDragging: isDragging,
+                    ValueListenableBuilder<VolumeStream>(
+                      valueListenable: volumeController.getStreamNotifier(streams[i]),
+                      builder: (context, currentStream, _) {
+                        return TactileStreamCard(
+                          stream: currentStream,
+                          onVolumeChanged: (pct, {bool isDragging = false}) {
+                            volumeController.setStreamPercentage(
+                              currentStream.streamType,
+                              pct,
+                              isDragging: isDragging,
+                            );
+                          },
+                          onStepMinus: () {
+                            volumeController.adjustStreamVolume(
+                              currentStream.streamType,
+                              -1,
+                            );
+                          },
+                          onStepPlus: () {
+                            volumeController.adjustStreamVolume(
+                              currentStream.streamType,
+                              1,
+                            );
+                          },
+                          onToggleMute: () {
+                            volumeController.toggleStreamMute(currentStream.streamType);
+                          },
                         );
-                      },
-                      onStepMinus: () {
-                        volumeController.adjustStreamVolume(
-                          streams[i].streamType,
-                          -1,
-                        );
-                      },
-                      onStepPlus: () {
-                        volumeController.adjustStreamVolume(
-                          streams[i].streamType,
-                          1,
-                        );
-                      },
-                      onToggleMute: () {
-                        volumeController.toggleStreamMute(streams[i].streamType);
                       },
                     ),
                     if (i < streams.length - 1) const SizedBox(height: 10),

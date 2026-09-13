@@ -58,7 +58,8 @@ class NotificationActionReceiver : BroadcastReceiver() {
             }
         }
 
-        VolumeNotificationService.updateNotification(context)
+        VolumeObserver.markInternalChange()
+        VolumeNotificationService.updateNotification(context, immediate = true)
         VolumeObserver.notifyVolumeChanged(context)
     }
 }

@@ -22,11 +22,22 @@ class VolumeObserver(private val context: Context) {
     private var isObserving = false
 
     private val debounceRunnable = Runnable {
-        dispatchVolumeUpdate(isExternal = true)
+        val isExternal = !isRecentInternalChange()
+        dispatchVolumeUpdate(isExternal = isExternal)
     }
 
     companion object {
         private var activeObserver: VolumeObserver? = null
+        @Volatile
+        private var lastInternalChangeTimestamp: Long = 0L
+
+        fun markInternalChange() {
+            lastInternalChangeTimestamp = System.currentTimeMillis()
+        }
+
+        fun isRecentInternalChange(): Boolean {
+            return (System.currentTimeMillis() - lastInternalChangeTimestamp) < 350L
+        }
 
         fun notifyVolumeChanged(context: Context) {
             activeObserver?.dispatchVolumeUpdate(isExternal = false)
@@ -126,11 +137,11 @@ class VolumeObserver(private val context: Context) {
 
     fun dispatchVolumeUpdate(isExternal: Boolean) {
         val streams = volumeManager.getStreams()
-        val masterPct = volumeManager.getMasterPercentage()
+        val masterPct = volumeManager.calculateMasterPercentage(streams)
         val hasSnapshot = volumeManager.hasSavedSnapshot()
 
         // Update persistent notification
-        VolumeNotificationService.updateNotification(context)
+        VolumeNotificationService.updateNotification(context, immediate = false)
 
         // Send to Flutter EventChannel
         handler.post {

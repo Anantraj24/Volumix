@@ -111,19 +111,23 @@ class VolumeManager(private val context: Context) {
         return result
     }
 
-    fun getMasterPercentage(): Int {
-        val streams = getStreams().filter { it["isSupported"] == true }
-        if (streams.isEmpty()) return 0
+    fun calculateMasterPercentage(streams: List<Map<String, Any>>): Int {
+        val supported = streams.filter { it["isSupported"] == true }
+        if (supported.isEmpty()) return 0
 
-        val priorityStreams = streams.filter {
+        val priorityStreams = supported.filter {
             val type = it["streamType"] as Int
             type == AudioManager.STREAM_MUSIC || type == AudioManager.STREAM_RING ||
             type == AudioManager.STREAM_NOTIFICATION || type == AudioManager.STREAM_ALARM
         }
 
-        val targetList = if (priorityStreams.isNotEmpty()) priorityStreams else streams
+        val targetList = if (priorityStreams.isNotEmpty()) priorityStreams else supported
         val avg = targetList.map { it["percentage"] as Int }.average()
         return avg.toInt().coerceIn(0, 100)
+    }
+
+    fun getMasterPercentage(): Int {
+        return calculateMasterPercentage(getStreams())
     }
 
     fun getStreamPercentage(streamType: Int): Int {

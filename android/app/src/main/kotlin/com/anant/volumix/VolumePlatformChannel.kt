@@ -52,8 +52,9 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
             "setVolume" -> {
                 val streamType = call.argument<Int>("streamType") ?: 3
                 val volume = call.argument<Int>("volume") ?: 0
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.setVolume(streamType, volume, false)
-                volumeObserver.dispatchVolumeUpdate(isExternal = false)
+                VolumeNotificationService.updateNotification(activity, immediate = false)
                 result.success(ok)
             }
             "applyStreamVolumes" -> {
@@ -65,12 +66,14 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
                         intMap[streamType] = v
                     }
                 }
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.applyStreamVolumes(intMap)
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)
             }
             "setMasterVolume" -> {
                 val percentage = call.argument<Int>("percentage") ?: 50
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.setMasterVolume(percentage)
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)
@@ -78,23 +81,27 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
             "adjustStreamVolume" -> {
                 val streamType = call.argument<Int>("streamType") ?: 3
                 val direction = call.argument<Int>("direction") ?: 1
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.adjustStreamVolume(streamType, direction)
-                volumeObserver.dispatchVolumeUpdate(isExternal = false)
+                VolumeNotificationService.updateNotification(activity, immediate = true)
                 result.success(ok)
             }
             "setStreamMute" -> {
                 val streamType = call.argument<Int>("streamType") ?: 3
                 val mute = call.argument<Boolean>("mute") ?: true
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.setStreamMute(streamType, mute)
-                volumeObserver.dispatchVolumeUpdate(isExternal = false)
+                VolumeNotificationService.updateNotification(activity, immediate = true)
                 result.success(ok)
             }
             "muteAll" -> {
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.muteAll()
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)
             }
             "restoreAll" -> {
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.restoreAll()
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)
@@ -103,6 +110,7 @@ class VolumePlatformChannel(private val activity: Activity) : MethodChannel.Meth
                 result.success(volumeManager.hasSavedSnapshot())
             }
             "resetDefaults" -> {
+                VolumeObserver.markInternalChange()
                 val ok = volumeManager.resetDefaults()
                 volumeObserver.dispatchVolumeUpdate(isExternal = false)
                 result.success(ok)

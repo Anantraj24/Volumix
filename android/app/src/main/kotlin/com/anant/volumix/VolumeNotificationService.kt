@@ -87,11 +87,34 @@ class VolumeNotificationService : Service() {
             nm.cancel(NOTIFICATION_ID)
         }
 
-        fun updateNotification(context: Context) {
+        private var lastNotificationUpdateTime: Long = 0L
+        private val updateHandler = android.os.Handler(android.os.Looper.getMainLooper())
+        private var pendingUpdateRunnable: Runnable? = null
+
+        fun updateNotification(context: Context, immediate: Boolean = false) {
             val prefs = context.getSharedPreferences("volumix_prefs", Context.MODE_PRIVATE)
             val isEnabled = prefs.getBoolean(VolumeManager.PREF_PERSISTENT_NOTIF, true)
             if (!isEnabled) return
 
+            val now = System.currentTimeMillis()
+            if (immediate || (now - lastNotificationUpdateTime) > 200L) {
+                lastNotificationUpdateTime = now
+                pendingUpdateRunnable?.let { updateHandler.removeCallbacks(it) }
+                pendingUpdateRunnable = null
+                doUpdateNotification(context)
+            } else {
+                if (pendingUpdateRunnable == null) {
+                    pendingUpdateRunnable = Runnable {
+                        lastNotificationUpdateTime = System.currentTimeMillis()
+                        pendingUpdateRunnable = null
+                        doUpdateNotification(context)
+                    }
+                    updateHandler.postDelayed(pendingUpdateRunnable!!, 200L)
+                }
+            }
+        }
+
+        private fun doUpdateNotification(context: Context) {
             try {
                 val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 val notification = buildNotification(context)
