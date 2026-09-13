@@ -1,5 +1,7 @@
 # Volumix
 
+**Version**: `2.0 Stable`
+
 A lightweight, high-performance volume manager for Android built with Flutter and native Kotlin (`AudioManager`, `ContentObserver`, and `RemoteViews`).
 
 Volumix gives you granular, real-time control over every Android audio stream with instant slider response, customizable profiles, and a persistent notification control center that works even when the screen is locked.

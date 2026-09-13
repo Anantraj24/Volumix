@@ -75,7 +75,7 @@ class AboutScreen extends StatelessWidget {
                 border: Border.all(color: AppColors.cardBorder),
               ),
               child: Text(
-                'Version 1.0.0 (Build 1)',
+                'Version 2.0 Stable (Build 2)',
                 style: AppTypography.labelSmall.copyWith(
                   color: AppColors.cyanDim,
                   fontWeight: FontWeight.w700,
@@ -183,7 +183,7 @@ class AboutScreen extends StatelessWidget {
                       showLicensePage(
                         context: context,
                         applicationName: 'Volumix',
-                        applicationVersion: '1.0.0',
+                        applicationVersion: '2.0 Stable',
                         applicationIcon: const Padding(
                           padding: EdgeInsets.all(12),
                           child: Icon(Icons.graphic_eq_rounded,
